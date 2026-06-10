@@ -4,18 +4,21 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export function buildWeekRange(dateStr: string): { start: string; end: string } {
-  const date = new Date(dateStr)
-  const day = date.getDay()
-  const diffToMonday = (day === 0 ? -6 : 1 - day)
-  const monday = new Date(date)
-  monday.setDate(date.getDate() + diffToMonday)
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const date = new Date(year, month - 1, day) // local time, not UTC
+  const dow = date.getDay()
+  const diffToMonday = (dow === 0 ? -6 : 1 - dow)
+  const monday = new Date(year, month - 1, day + diffToMonday)
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)
 
-  return {
-    start: monday.toISOString().split('T')[0],
-    end: sunday.toISOString().split('T')[0],
+  function fmt(d: Date): string {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const dd = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${dd}`
   }
+
+  return { start: fmt(monday), end: fmt(sunday) }
 }
 
 export async function getTasksForWeek(weekStart: string) {
