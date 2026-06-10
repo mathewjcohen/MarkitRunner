@@ -18,7 +18,7 @@ export interface TrialExpiryProps {
 export function welcomeEmail({ firstName }: WelcomeEmailProps): { subject: string; html: string } {
   const name = firstName ?? 'there'
   return {
-    subject: 'Welcome to Tempo — your marketing rhythm starts now',
+    subject: 'Welcome to MarkitRunner — your marketing rhythm starts now',
     html: `
 <!DOCTYPE html>
 <html>
@@ -29,18 +29,18 @@ export function welcomeEmail({ firstName }: WelcomeEmailProps): { subject: strin
       Hey ${name}.
     </p>
     <p style="font-size:16px;color:#18160F;line-height:1.7;margin:0 0 16px 0;">
-      Welcome to Tempo — the marketing planner built for founders who are running multiple
+      Welcome to MarkitRunner — the marketing planner built for founders who are running multiple
       businesses and need to stay consistent without burning out.
     </p>
     <p style="font-size:16px;color:#18160F;line-height:1.7;margin:0 0 32px 0;">
-      Your trial is active. Add your first business and let Tempo generate your weekly plan.
+      Your trial is active. Add your first business and let MarkitRunner generate your weekly plan.
     </p>
     <a href="${process.env.NEXT_PUBLIC_APP_URL}/app/dashboard"
        style="display:inline-block;background:#B8601F;color:#FFFFFF;text-decoration:none;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:500;">
       Get started
     </a>
     <p style="font-size:13px;color:#736C5E;margin:48px 0 0 0;line-height:1.6;">
-      Tempo — stay in rhythm.<br>
+      MarkitRunner — stay in rhythm.<br>
       <a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe" style="color:#B8601F;">Unsubscribe</a>
     </p>
   </div>
@@ -61,7 +61,7 @@ export function weeklySummaryEmail({
   const businessList = businessNames.map((b) => `<li style="margin:4px 0;">${b}</li>`).join('')
 
   return {
-    subject: `Your week in Tempo — ${completedTasks}/${totalTasks} tasks done`,
+    subject: `Your week in MarkitRunner — ${completedTasks}/${totalTasks} tasks done`,
     html: `
 <!DOCTYPE html>
 <html>
@@ -93,7 +93,7 @@ export function weeklySummaryEmail({
       See today's task
     </a>
     <p style="font-size:13px;color:#736C5E;margin:48px 0 0 0;line-height:1.6;">
-      Tempo — stay in rhythm.<br>
+      MarkitRunner — stay in rhythm.<br>
       <a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe" style="color:#B8601F;">Unsubscribe</a>
     </p>
   </div>
@@ -136,7 +136,7 @@ export function trialExpiryEmail({
       Upgrade now
     </a>
     <p style="font-size:13px;color:#736C5E;margin:48px 0 0 0;line-height:1.6;">
-      Tempo — stay in rhythm.<br>
+      MarkitRunner — stay in rhythm.<br>
       <a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe" style="color:#B8601F;">Unsubscribe</a>
     </p>
   </div>

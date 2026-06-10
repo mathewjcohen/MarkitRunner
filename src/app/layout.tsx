@@ -14,7 +14,7 @@ const jakarta = Plus_Jakarta_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Tempo — Marketing OS for solo founders',
+  title: 'MarkitRunner — Marketing OS for solo founders',
   description: 'A behavioral marketing planner that keeps you consistent across all your businesses.',
 }
 

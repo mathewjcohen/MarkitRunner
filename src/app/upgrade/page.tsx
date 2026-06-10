@@ -3,7 +3,7 @@ import { PRICE_IDS } from '@/lib/stripe/client'
 import { PricingPage } from '@/components/upgrade/PricingPage'
 
 export const metadata = {
-  title: 'Upgrade - Tempo',
+  title: 'Upgrade - MarkitRunner',
   description: 'Choose your plan to unlock more features',
 }
 

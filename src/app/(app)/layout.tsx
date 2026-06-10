@@ -52,7 +52,7 @@ export default async function AppLayout({
                 className="text-sm font-medium cursor-pointer"
                 style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
               >
-                Tempo
+                MarkitRunner
               </a>
               <nav className="flex items-center gap-4">
                 <a
