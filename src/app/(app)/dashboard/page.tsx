@@ -7,6 +7,7 @@ export default async function DashboardPage() {
   const businesses = await getBusinesses()
   const today = new Date().toISOString().split('T')[0]
 
+  const now = Date.now()
   const businessesWithData = await Promise.all(
     businesses.map(async (b) => {
       const [channels, weekTasks] = await Promise.all([
@@ -24,7 +25,7 @@ export default async function DashboardPage() {
       )[0]
       const daysSince = lastCompleted
         ? Math.floor(
-            (Date.now() - new Date(lastCompleted.completed_at!).getTime()) / 86400000
+            (now - new Date(lastCompleted.completed_at!).getTime()) / 86400000
           )
         : null
 

@@ -13,7 +13,7 @@ export default function OnboardingStep6() {
         className="text-3xl mb-2 leading-tight"
         style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
       >
-        You're all set
+        You&apos;re all set
       </h1>
       <p className="text-sm mb-8" style={{ color: '#736C5E' }}>
         Want to add another business now? You can always add more from the dashboard.

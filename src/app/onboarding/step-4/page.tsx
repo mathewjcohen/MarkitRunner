@@ -46,7 +46,7 @@ function Step4Content() {
         These shape every plan the AI generates for you.
       </p>
       <p className="text-xs mb-7" style={{ color: '#A89F94' }}>
-        Examples: "behind the scenes", "customer stories", "tutorials"
+        Examples: &quot;behind the scenes&quot;, &quot;customer stories&quot;, &quot;tutorials&quot;
       </p>
       <div className="flex flex-col gap-3 mb-6">
         {themes.map((t, i) => (

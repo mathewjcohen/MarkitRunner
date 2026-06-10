@@ -31,7 +31,7 @@ function Step5Content() {
         Last 3 marketing efforts
       </h1>
       <p className="text-sm mb-2" style={{ color: '#736C5E' }}>
-        Don't overthink it — describe the last 3 things you actually did to promote this business.
+        Don&apos;t overthink it — describe the last 3 things you actually did to promote this business.
       </p>
       <p
         className="text-xs mb-7 px-3 py-2 rounded-lg"
