@@ -79,7 +79,7 @@ export default function OnboardingStep1() {
           type="submit"
           disabled={loading}
           className="rounded-xl px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors mt-1 disabled:opacity-60"
-          style={{ backgroundColor: loading ? '#9A4F17' : '#B8601F', color: '#FFFFFF' }}
+          style={{ backgroundColor: '#B8601F', color: '#FFFFFF' }}
         >
           {loading ? 'Saving…' : 'Continue →'}
         </button>

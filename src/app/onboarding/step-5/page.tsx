@@ -1,11 +1,12 @@
 'use client'
 
+import { Suspense } from 'react'
 import { updateBusiness } from '@/actions/businesses'
 import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
-export default function OnboardingStep5() {
+function Step5Content() {
   const router = useRouter()
   const params = useSearchParams()
   const businessId = params.get('business_id')!
@@ -65,5 +66,13 @@ export default function OnboardingStep5() {
         </button>
       </form>
     </div>
+  )
+}
+
+export default function OnboardingStep5() {
+  return (
+    <Suspense fallback={<div className="animate-pulse" style={{ minHeight: 400 }} />}>
+      <Step5Content />
+    </Suspense>
   )
 }

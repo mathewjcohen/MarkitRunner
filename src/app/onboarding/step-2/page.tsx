@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { createChannel } from '@/actions/channels'
 import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -20,7 +21,7 @@ const CHANNELS: { value: ChannelType; label: string }[] = [
   { value: 'website_blog', label: 'Website / blog' },
 ]
 
-export default function OnboardingStep2() {
+function Step2Content() {
   const router = useRouter()
   const params = useSearchParams()
   const businessId = params.get('business_id')!
@@ -94,5 +95,13 @@ export default function OnboardingStep2() {
         {loading ? 'Saving…' : 'Continue →'}
       </button>
     </div>
+  )
+}
+
+export default function OnboardingStep2() {
+  return (
+    <Suspense fallback={<div className="animate-pulse" style={{ minHeight: 400 }} />}>
+      <Step2Content />
+    </Suspense>
   )
 }

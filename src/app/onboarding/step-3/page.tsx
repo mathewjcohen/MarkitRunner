@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { updateBusiness } from '@/actions/businesses'
 import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -15,7 +16,16 @@ const GOALS: { value: PrimaryGoal; label: string }[] = [
   { value: 'launch_something', label: 'Launch something' },
 ]
 
-export default function OnboardingStep3() {
+const VALID_GOALS: PrimaryGoal[] = [
+  'grow_audience',
+  'drive_sales',
+  'build_community',
+  'increase_awareness',
+  'get_feedback',
+  'launch_something',
+]
+
+function Step3Content() {
   const router = useRouter()
   const params = useSearchParams()
   const businessId = params.get('business_id')!
@@ -24,8 +34,16 @@ export default function OnboardingStep3() {
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
+    const rawGoal = formData.get('primary_goal') as string
+
+    if (!VALID_GOALS.includes(rawGoal as PrimaryGoal)) {
+      setError('Please select a valid goal')
+      setLoading(false)
+      return
+    }
+
     const result = await updateBusiness(businessId, {
-      primary_goal: formData.get('primary_goal') as PrimaryGoal,
+      primary_goal: rawGoal as PrimaryGoal,
       success_definition: formData.get('success_definition') as string,
     })
     setLoading(false)
@@ -81,5 +99,13 @@ export default function OnboardingStep3() {
         </button>
       </form>
     </div>
+  )
+}
+
+export default function OnboardingStep3() {
+  return (
+    <Suspense fallback={<div className="animate-pulse" style={{ minHeight: 400 }} />}>
+      <Step3Content />
+    </Suspense>
   )
 }
