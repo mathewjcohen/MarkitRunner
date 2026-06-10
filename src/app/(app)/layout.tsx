@@ -40,6 +40,13 @@ export default async function AppLayout({
                 >
                   Dashboard
                 </a>
+                <a
+                  href="/app/metrics"
+                  className="text-sm cursor-pointer transition-colors hover:opacity-70"
+                  style={{ color: '#736C5E' }}
+                >
+                  Metrics
+                </a>
               </nav>
             </div>
             <div className="w-48">
