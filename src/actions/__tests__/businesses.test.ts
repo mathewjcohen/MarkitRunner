@@ -1,4 +1,4 @@
-import { validateBusinessInput, validateChannelCount } from '@/actions/businesses'
+import { validateBusinessInput, validateChannelCount } from '@/lib/utils/validation'
 import { BUSINESS_LIMITS, CHANNEL_LIMITS } from '@/types'
 
 describe('validateBusinessInput', () => {

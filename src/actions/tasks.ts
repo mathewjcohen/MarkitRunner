@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { buildWeekRange } from '@/lib/utils/date'
 import { revalidatePath } from 'next/cache'
 
+export { buildWeekRange } from '@/lib/utils/date'
+
 export async function getTasksForWeek(weekStart: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
