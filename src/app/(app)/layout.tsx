@@ -1,6 +1,7 @@
 import { getUsageWallState } from '@/actions/usage'
 import { UsageBar } from '@/components/ui/UsageBar'
 import { TrialBanner } from '@/components/ui/TrialBanner'
+import { BottomNav } from '@/components/nav/BottomNav'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function AppLayout({
@@ -88,7 +89,10 @@ export default async function AppLayout({
       <TrialBanner daysLeft={daysLeft} tier={tier} />
 
       {/* Page content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-14 md:pb-0">{children}</main>
+
+      {/* Mobile bottom nav */}
+      <BottomNav />
     </div>
   )
 }
