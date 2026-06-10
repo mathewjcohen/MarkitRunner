@@ -45,7 +45,7 @@ export async function createBusiness(formData: FormData) {
     .eq('user_id', user.id)
     .eq('is_active', true)
 
-  const limit = BUSINESS_LIMITS[userData?.tier as Tier ?? 'trial']
+  const limit = BUSINESS_LIMITS[(userData?.tier ?? 'trial') as Tier]
   if (limit !== null && (count ?? 0) >= limit) {
     return { error: `Your plan allows up to ${limit} businesses` }
   }

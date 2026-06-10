@@ -27,7 +27,7 @@ export async function createChannel(
     .eq('business_id', businessId)
     .eq('is_active', true)
 
-  const limitError = validateChannelCount(userData?.tier as Tier ?? 'trial', count ?? 0)
+  const limitError = validateChannelCount((userData?.tier ?? 'trial') as Tier, count ?? 0)
   if (limitError) return { error: limitError }
 
   const { data, error } = await supabase
@@ -50,6 +50,9 @@ export async function createChannel(
 
 export async function getChannelsForBusiness(businessId: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data } = await supabase
     .from('channels')
     .select('*')
