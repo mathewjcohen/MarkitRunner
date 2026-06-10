@@ -1,5 +1,7 @@
 import { getUsageWallState } from '@/actions/usage'
 import { UsageBar } from '@/components/ui/UsageBar'
+import { TrialBanner } from '@/components/ui/TrialBanner'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function AppLayout({
   children,
@@ -7,6 +9,32 @@ export default async function AppLayout({
   children: React.ReactNode
 }) {
   const usage = await getUsageWallState()
+
+  // Fetch trial data for TrialBanner
+  let daysLeft = 0
+  let tier = 'trial'
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('tier, trial_ends_at')
+        .eq('id', user.id)
+        .single()
+
+      if (userData) {
+        tier = userData.tier
+        if (userData.trial_ends_at) {
+          const trialEndDate = new Date(userData.trial_ends_at).getTime()
+          const now = Date.now()
+          daysLeft = Math.ceil((trialEndDate - now) / 86400000)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch trial data:', error)
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F7F5F1' }}>
@@ -55,6 +83,9 @@ export default async function AppLayout({
           </div>
         </div>
       </header>
+
+      {/* Trial banner */}
+      <TrialBanner daysLeft={daysLeft} tier={tier} />
 
       {/* Page content */}
       <main className="flex-1">{children}</main>
