@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { validateChannelCount } from '@/actions/businesses'
+import { validateChannelCount } from '@/lib/utils/validation'
 import type { ChannelType, Cadence, Tier } from '@/types'
 
 export async function createChannel(
