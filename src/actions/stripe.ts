@@ -5,6 +5,7 @@ import { stripe, PRICE_IDS } from '@/lib/stripe/client'
 import { redirect } from 'next/navigation'
 
 export async function createCheckoutSession(priceId: string) {
+  if (!process.env.STRIPE_SECRET_KEY) return { error: 'Billing not yet available' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -23,6 +24,7 @@ export async function createCheckoutSession(priceId: string) {
 }
 
 export async function createPortalSession() {
+  if (!process.env.STRIPE_SECRET_KEY) return { error: 'Billing not yet available' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }

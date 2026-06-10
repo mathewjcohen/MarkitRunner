@@ -27,6 +27,8 @@ export default async function UpgradePage() {
     console.error('Failed to fetch user tier:', error)
   }
 
+  const stripeConfigured = !!process.env.STRIPE_SECRET_KEY
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F7F5F1' }}>
       {/* Header */}
@@ -60,7 +62,17 @@ export default async function UpgradePage() {
             </p>
           </div>
 
-          <PricingPage currentTier={currentTier} priceIds={PRICE_IDS} />
+          {stripeConfigured ? (
+            <PricingPage currentTier={currentTier} priceIds={PRICE_IDS} />
+          ) : (
+            <div
+              className="rounded-2xl p-12 text-center border"
+              style={{ backgroundColor: '#FFFFFF', borderColor: '#E8E4DC' }}
+            >
+              <p className="text-lg font-semibold mb-2" style={{ color: '#18160F' }}>Paid plans coming soon</p>
+              <p style={{ color: '#736C5E' }}>Billing will be available shortly. Everything is free during early access.</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
