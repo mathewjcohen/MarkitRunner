@@ -1,6 +1,7 @@
 import type { Business, Channel } from '@/types'
 import { BusinessCardActions } from './BusinessCardActions'
 import { BusinessCardMenu } from './BusinessCardMenu'
+import { ChannelManagerModal } from './ChannelManagerModal'
 
 interface BusinessCardProps {
   business: Business
@@ -64,7 +65,11 @@ export function BusinessCard({
         </div>
       </div>
       <div className="flex gap-4 text-sm flex-wrap" style={{ color: 'var(--color-text-muted)' }}>
-        <span>{channels.length} channel{channels.length !== 1 ? 's' : ''}</span>
+        <ChannelManagerModal
+          businessId={business.id}
+          businessName={business.name}
+          initialChannels={channels}
+        />
         {daysSinceLastTask !== null && (
           <span>{daysSinceLastTask === 0 ? 'Active today' : `${daysSinceLastTask}d since last task`}</span>
         )}

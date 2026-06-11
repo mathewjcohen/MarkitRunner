@@ -78,6 +78,24 @@ export async function getChannelsForBusiness(businessId: string) {
   return data ?? []
 }
 
+export async function deleteChannel(channelId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('channels')
+    .update({ is_active: false })
+    .eq('id', channelId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/dashboard')
+  revalidatePath('/app/settings')
+  return { success: true }
+}
+
 export async function updateChannelNotes(channelId: string, notes: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

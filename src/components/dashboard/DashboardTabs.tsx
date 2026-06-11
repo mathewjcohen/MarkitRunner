@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Task, Business, Channel } from '@/types'
 import { isToday } from '@/lib/utils/date'
 import { formatChannelType } from '@/lib/utils/format'
-import { completeTask, uncompleteTask, replaceTask } from '@/actions/tasks'
+import { completeTask, uncompleteTask, replaceTask, dismissTask } from '@/actions/tasks'
 
 interface TaskWithRelations extends Task {
   businesses: { name: string } | null
@@ -41,6 +41,7 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
   const [confirmingReplaceId, setConfirmingReplaceId] = useState<string | null>(null)
   const [replacingId, setReplacingId] = useState<string | null>(null)
   const replaceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [localDismissed, setLocalDismissed] = useState<Set<string>>(new Set())
 
   const allWeekTasks = businessesWithData.flatMap((b) => b.weekTasks)
   const tasksByDate = allWeekTasks.reduce(
@@ -95,6 +96,21 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
       setConfirmingReplaceId(taskId)
       replaceTimeoutRef.current = setTimeout(() => setConfirmingReplaceId(null), 3000)
     }
+  }
+
+  function handleDismiss(taskId: string) {
+    setLocalDismissed(prev => new Set([...prev, taskId]))
+    dismissTask(taskId).then(result => {
+      if (result?.error) {
+        setLocalDismissed(prev => {
+          const next = new Set(prev)
+          next.delete(taskId)
+          return next
+        })
+      } else {
+        router.refresh()
+      }
+    })
   }
 
   function channelLabel(task: TaskWithRelations): string {
@@ -291,8 +307,8 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
                   </div>
                 </div>
                 <div className="px-3 py-2.5 flex flex-col gap-2 min-h-32">
-                  {tasksByDate[dayInfo.date]?.length > 0 ? (
-                    tasksByDate[dayInfo.date].map((task) => {
+                  {tasksByDate[dayInfo.date]?.filter(t => !localDismissed.has(t.id)).length > 0 ? (
+                    tasksByDate[dayInfo.date].filter(t => !localDismissed.has(t.id)).map((task) => {
                       const done = isCompleted(task)
                       const isPending = pendingTaskId === task.id
                       const isExpanded = expandedTaskId === task.id
@@ -371,6 +387,26 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
                                 <div style={{ fontSize: '0.65rem', color: 'var(--color-text-subtle)', marginTop: '2px' }}>Replaced</div>
                               )}
                             </button>
+
+                            {/* Dismiss button for replaced tasks */}
+                            {isReplaced && (
+                              <button
+                                onClick={() => handleDismiss(task.id)}
+                                title="Dismiss"
+                                className="cursor-pointer flex-shrink-0"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--color-text-subtle)',
+                                  cursor: 'pointer',
+                                  padding: '0 2px',
+                                  fontSize: '0.9rem',
+                                  lineHeight: 1,
+                                }}
+                              >
+                                ×
+                              </button>
+                            )}
                           </div>
 
                           {/* Expanded description */}

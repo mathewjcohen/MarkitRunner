@@ -175,5 +175,26 @@ export async function replaceTask(taskId: string) {
 
   revalidatePath('/app/today')
   revalidatePath('/app/weekly')
+  revalidatePath('/app/dashboard')
+  return { success: true }
+}
+
+export async function dismissTask(taskId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', taskId)
+    .eq('user_id', user.id)
+    .not('replaced_at', 'is', null)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/today')
+  revalidatePath('/app/weekly')
+  revalidatePath('/app/dashboard')
   return { success: true }
 }

@@ -37,9 +37,10 @@ export default async function DashboardPage() {
     activeBusinesses.map(async (b) => {
       const channels: Channel[] = await getChannelsForBusiness(b.id)
       const bizWeekTasks = allWeekTasks.filter((t) => t.business_id === b.id)
-      const bizTodayTasks = bizWeekTasks.filter((t) => t.scheduled_date === today)
-      const completed = bizWeekTasks.filter((t) => t.completed_at).length
-      const total = bizWeekTasks.length
+      const bizTodayTasks = bizWeekTasks.filter((t) => t.scheduled_date === today && !t.replaced_at)
+      const activeBizTasks = bizWeekTasks.filter((t) => !t.replaced_at)
+      const completed = activeBizTasks.filter((t) => t.completed_at).length
+      const total = activeBizTasks.length
 
       const lastCompleted = [...bizWeekTasks]
         .filter((t) => t.completed_at)
@@ -67,9 +68,10 @@ export default async function DashboardPage() {
     })
   )
 
-  const todayTasksAll = allWeekTasks.filter((t) => t.scheduled_date === today)
+  const activeWeekTasks = allWeekTasks.filter((t) => !t.replaced_at)
+  const todayTasksAll = activeWeekTasks.filter((t) => t.scheduled_date === today)
   const completedToday = todayTasksAll.filter((t) => t.completed_at).length
-  const completedWeek = allWeekTasks.filter((t) => t.completed_at).length
+  const completedWeek = activeWeekTasks.filter((t) => t.completed_at).length
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -92,7 +94,7 @@ export default async function DashboardPage() {
       <DashboardStats
         totalToday={todayTasksAll.length}
         completedToday={completedToday}
-        totalWeek={allWeekTasks.length}
+        totalWeek={activeWeekTasks.length}
         completedWeek={completedWeek}
         activeBusinesses={activeBusinesses.length}
       />
