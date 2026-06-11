@@ -16,7 +16,7 @@ export function TrialBanner({ daysLeft, tier }: TrialBannerProps) {
 
   return (
     <div
-      className="sticky top-14 z-9 border-b"
+      className="sticky top-14 z-[9] border-b"
       style={{ backgroundColor: '#FFFBF5', borderColor: '#E8E4DC' }}
     >
       <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">

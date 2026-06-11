@@ -48,6 +48,21 @@ export async function createChannel(
   return { data }
 }
 
+export async function clearChannelsForBusiness(businessId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('channels')
+    .delete()
+    .eq('business_id', businessId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
 export async function getChannelsForBusiness(businessId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

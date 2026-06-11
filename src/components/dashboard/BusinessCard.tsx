@@ -1,4 +1,5 @@
 import type { Business, Channel } from '@/types'
+import { BusinessCardActions } from './BusinessCardActions'
 
 interface BusinessCardProps {
   business: Business
@@ -7,6 +8,7 @@ interface BusinessCardProps {
   totalThisWeek: number
   daysSinceLastTask: number | null
   nextTaskDate: string | null
+  weekStartDate: string
 }
 
 export function BusinessCard({
@@ -16,6 +18,7 @@ export function BusinessCard({
   totalThisWeek,
   daysSinceLastTask,
   nextTaskDate,
+  weekStartDate,
 }: BusinessCardProps) {
   const consistencyPct = totalThisWeek > 0
     ? Math.round((completedThisWeek / totalThisWeek) * 100)
@@ -43,6 +46,11 @@ export function BusinessCard({
         )}
         {nextTaskDate && <span>Next: {nextTaskDate}</span>}
       </div>
+      <BusinessCardActions
+        businessId={business.id}
+        weekStartDate={weekStartDate}
+        hasTasks={totalThisWeek > 0}
+      />
     </div>
   )
 }

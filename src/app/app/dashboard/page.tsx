@@ -2,10 +2,12 @@ import { getBusinesses } from '@/actions/businesses'
 import { getChannelsForBusiness } from '@/actions/channels'
 import { getTasksForWeek } from '@/actions/tasks'
 import { BusinessCard } from '@/components/dashboard/BusinessCard'
+import { buildWeekRange } from '@/lib/utils/date'
 
 export default async function DashboardPage() {
   const businesses = await getBusinesses()
   const today = new Date().toISOString().split('T')[0]
+  const { start: weekStartDate } = buildWeekRange(today)
 
   const now = Date.now()
   const businessesWithData = await Promise.all(
@@ -72,6 +74,7 @@ export default async function DashboardPage() {
                 totalThisWeek={total}
                 daysSinceLastTask={daysSince}
                 nextTaskDate={nextTaskDate}
+                weekStartDate={weekStartDate}
               />
             )
           )}

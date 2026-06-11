@@ -6,10 +6,31 @@ import Link from 'next/link'
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
+    setLoading(true)
     const result = await signUp(formData)
-    if (result?.error) setError(result.error)
+    setLoading(false)
+    if (result?.error) {
+      setError(result.error)
+    } else if (result?.success) {
+      setSent(true)
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-full max-w-sm p-8 bg-white rounded-xl shadow-sm text-center">
+          <h1 className="text-2xl font-semibold mb-3">Check your email</h1>
+          <p className="text-sm text-gray-500">
+            We sent a confirmation link to your inbox. Click it to activate your account and start onboarding.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -36,9 +57,10 @@ export default function SignupPage() {
           {error && <p className="text-sm text-red-500">{error}</p>}
           <button
             type="submit"
-            className="bg-black text-white rounded-lg px-4 py-2 text-sm font-medium cursor-pointer hover:bg-gray-800 transition-colors"
+            disabled={loading}
+            className="bg-black text-white rounded-lg px-4 py-2 text-sm font-medium cursor-pointer hover:bg-gray-800 transition-colors disabled:opacity-60"
           >
-            Create account
+            {loading ? 'Creating account…' : 'Create account'}
           </button>
         </form>
         <p className="text-xs text-gray-400 mt-4 text-center">

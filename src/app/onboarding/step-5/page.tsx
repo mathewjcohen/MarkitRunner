@@ -1,78 +1,25 @@
-'use client'
+import { createClient } from '@/lib/supabase/server'
+import { Step5Form } from './Step5Form'
 
-import { Suspense } from 'react'
-import { updateBusiness } from '@/actions/businesses'
-import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+export default async function OnboardingStep5({
+  searchParams,
+}: {
+  searchParams: Promise<{ business_id?: string }>
+}) {
+  const { business_id = '' } = await searchParams
 
-function Step5Content() {
-  const router = useRouter()
-  const params = useSearchParams()
-  const businessId = params.get('business_id')!
-  const [loading, setLoading] = useState(false)
+  let initialNotes = ''
 
-  async function handleSubmit(formData: FormData) {
-    setLoading(true)
-    const notes = formData.get('cold_start_notes') as string
-    if (notes.trim()) {
-      await updateBusiness(businessId, { cold_start_notes: notes })
-    }
-    router.push(`/onboarding/step-6?business_id=${businessId}`)
+  if (business_id) {
+    const supabase = await createClient()
+    const { data: biz } = await supabase
+      .from('businesses')
+      .select('cold_start_notes')
+      .eq('id', business_id)
+      .single()
+
+    initialNotes = biz?.cold_start_notes ?? ''
   }
 
-  return (
-    <div className="step-enter">
-      <OnboardingProgress currentStep={5} totalSteps={6} />
-      <h1
-        className="text-3xl mb-2 leading-tight"
-        style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
-      >
-        Last 3 marketing efforts
-      </h1>
-      <p className="text-sm mb-2" style={{ color: '#736C5E' }}>
-        Don&apos;t overthink it — describe the last 3 things you actually did to promote this business.
-      </p>
-      <p
-        className="text-xs mb-7 px-3 py-2 rounded-lg"
-        style={{ color: '#736C5E', backgroundColor: '#F7F5F1' }}
-      >
-        The AI uses this to start from where you are, not from scratch.
-      </p>
-      <form action={handleSubmit} className="flex flex-col gap-3.5">
-        <textarea
-          name="cold_start_notes"
-          placeholder="e.g. Posted in a Discord server, tweeted about a new feature, sent an update to my email list…"
-          rows={5}
-          className="border rounded-xl px-4 py-2.5 text-sm resize-none w-full focus:outline-none"
-          style={{ borderColor: '#E8E4DC', color: '#18160F' }}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-xl px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors disabled:opacity-60"
-          style={{ backgroundColor: '#B8601F', color: '#FFFFFF' }}
-        >
-          {loading ? 'Saving…' : 'Continue →'}
-        </button>
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => router.push(`/onboarding/step-6?business_id=${businessId}`)}
-          className="text-sm cursor-pointer transition-colors"
-          style={{ color: '#A89F94' }}
-        >
-          Skip (not recommended)
-        </button>
-      </form>
-    </div>
-  )
-}
-
-export default function OnboardingStep5() {
-  return (
-    <Suspense fallback={<div className="animate-pulse" style={{ minHeight: 400 }} />}>
-      <Step5Content />
-    </Suspense>
-  )
+  return <Step5Form businessId={business_id} initialNotes={initialNotes} />
 }

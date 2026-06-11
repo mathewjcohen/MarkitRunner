@@ -1,4 +1,4 @@
-import { buildWeekRange } from '@/actions/tasks'
+import { buildWeekRange } from '@/lib/utils/date'
 
 describe('buildWeekRange', () => {
   it('returns Monday to Sunday for a given week start', () => {

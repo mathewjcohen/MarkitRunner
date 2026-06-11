@@ -29,6 +29,10 @@ export default function OnboardingStep1() {
       setError(result.error)
       return
     }
+    if (!result.data?.id) {
+      setError('Failed to create business. Please try again.')
+      return
+    }
     router.push(`/onboarding/step-2?business_id=${result.data.id}`)
   }
 

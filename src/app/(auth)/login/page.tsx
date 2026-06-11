@@ -3,9 +3,14 @@
 import { signIn } from '@/actions/auth'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const confirmError = searchParams.get('error') === 'confirmation_failed'
+  const [error, setError] = useState<string | null>(
+    confirmError ? 'Confirmation link expired or invalid. Please sign up again.' : null
+  )
 
   async function handleSubmit(formData: FormData) {
     const result = await signIn(formData)

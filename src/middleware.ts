@@ -38,24 +38,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/app/today', request.url))
   }
 
-  // Check onboarding status for authenticated users
-  if (user) {
+  // Redirect completed users away from /onboarding
+  if (user && pathname.startsWith('/onboarding')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('onboarding_complete')
       .eq('id', user.id)
       .single()
 
-    const onboardingComplete = profile?.onboarding_complete ?? false
-
-    // Redirect incomplete onboarding users trying to access /app routes
-    if (!onboardingComplete && pathname.startsWith('/app')) {
-      return NextResponse.redirect(new URL('/onboarding/step-1', request.url))
-    }
-
-    // Redirect completed onboarding users trying to access /onboarding routes
-    if (onboardingComplete && pathname.startsWith('/onboarding')) {
-      return NextResponse.redirect(new URL('/app/dashboard', request.url))
+    if (profile?.onboarding_complete) {
+      return NextResponse.redirect(new URL('/app/today', request.url))
     }
   }
 

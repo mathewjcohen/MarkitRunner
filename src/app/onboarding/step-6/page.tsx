@@ -1,10 +1,25 @@
 'use client'
 
+import { completeOnboarding } from '@/actions/auth'
 import { OnboardingProgress } from '@/components/onboarding/OnboardingProgress'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export default function OnboardingStep6() {
   const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleFinish() {
+    setLoading(true)
+    const result = await completeOnboarding()
+    if (result?.error) {
+      setError(result.error)
+      setLoading(false)
+      return
+    }
+    router.push('/app/today')
+  }
 
   return (
     <div className="step-enter">
@@ -26,12 +41,14 @@ export default function OnboardingStep6() {
         >
           Add another business
         </button>
+        {error && <p className="text-sm" style={{ color: '#DC2626' }}>{error}</p>}
         <button
-          onClick={() => router.push('/app/today')}
-          className="rounded-xl px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors"
+          onClick={handleFinish}
+          disabled={loading}
+          className="rounded-xl px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors disabled:opacity-60"
           style={{ backgroundColor: '#B8601F', color: '#FFFFFF' }}
         >
-          Generate my first plan →
+          {loading ? 'Setting up…' : 'Generate my first plan →'}
         </button>
       </div>
     </div>
