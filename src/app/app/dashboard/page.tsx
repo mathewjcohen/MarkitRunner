@@ -8,7 +8,13 @@ import { ArchivedSection } from '@/components/dashboard/ArchivedSection'
 import { buildWeekRange, getWeekDates } from '@/lib/utils/date'
 import type { Channel } from '@/types'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
+  const { tab } = await searchParams
+  const defaultTab = tab === 'weekly' ? 'weekly' : 'today'
   const today = new Date().toISOString().split('T')[0]
   const { start: weekStartDate } = buildWeekRange(today)
   const weekDates = getWeekDates(weekStartDate)
@@ -123,6 +129,7 @@ export default async function DashboardPage() {
             <DashboardTabs
               businessesWithData={businessesWithData}
               weekDates={weekDates}
+              defaultTab={defaultTab}
             />
           )}
         </>

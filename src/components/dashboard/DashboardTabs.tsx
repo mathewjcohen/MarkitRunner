@@ -24,12 +24,13 @@ interface BusinessWithData {
 interface DashboardTabsProps {
   businessesWithData: BusinessWithData[]
   weekDates: Array<{ date: string; dayName: string; dayNum: number }>
+  defaultTab?: 'today' | 'weekly'
 }
 
 type Tab = 'today' | 'weekly'
 
-export function DashboardTabs({ businessesWithData, weekDates }: DashboardTabsProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('today')
+export function DashboardTabs({ businessesWithData, weekDates, defaultTab = 'today' }: DashboardTabsProps) {
+  const [activeTab, setActiveTab] = useState<Tab>(defaultTab)
 
   const allWeekTasks = businessesWithData.flatMap((b) => b.weekTasks)
   const tasksByDate = allWeekTasks.reduce(

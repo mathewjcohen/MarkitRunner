@@ -61,7 +61,7 @@ export function BusinessCardActions({ businessId, weekStartDate, hasTasks }: Bus
         </button>
         {hasTasks && (
           <a
-            href="/app/dashboard"
+            href="/app/dashboard?tab=weekly"
             className="text-sm font-medium cursor-pointer transition-opacity hover:opacity-70"
             style={{ color: 'var(--color-accent)' }}
           >
