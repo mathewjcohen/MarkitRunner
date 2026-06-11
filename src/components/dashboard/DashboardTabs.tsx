@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Task, Business, Channel } from '@/types'
 import { isToday } from '@/lib/utils/date'
 import { formatChannelType } from '@/lib/utils/format'
-import { completeTask, uncompleteTask } from '@/actions/tasks'
+import { completeTask, uncompleteTask, replaceTask } from '@/actions/tasks'
 
 interface TaskWithRelations extends Task {
   businesses: { name: string } | null
@@ -38,6 +38,9 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
   const [localCompletions, setLocalCompletions] = useState<Record<string, boolean>>({})
+  const [confirmingReplaceId, setConfirmingReplaceId] = useState<string | null>(null)
+  const [replacingId, setReplacingId] = useState<string | null>(null)
+  const replaceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const allWeekTasks = businessesWithData.flatMap((b) => b.weekTasks)
   const tasksByDate = allWeekTasks.reduce(
@@ -77,6 +80,21 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
 
   function toggleExpanded(taskId: string) {
     setExpandedTaskId((prev) => (prev === taskId ? null : taskId))
+  }
+
+  async function handleReplaceClick(taskId: string) {
+    if (confirmingReplaceId === taskId) {
+      if (replaceTimeoutRef.current) clearTimeout(replaceTimeoutRef.current)
+      setConfirmingReplaceId(null)
+      setReplacingId(taskId)
+      await replaceTask(taskId)
+      setReplacingId(null)
+      router.refresh()
+    } else {
+      if (replaceTimeoutRef.current) clearTimeout(replaceTimeoutRef.current)
+      setConfirmingReplaceId(taskId)
+      replaceTimeoutRef.current = setTimeout(() => setConfirmingReplaceId(null), 3000)
+    }
   }
 
   function channelLabel(task: TaskWithRelations): string {
@@ -279,20 +297,25 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
                       const isPending = pendingTaskId === task.id
                       const isExpanded = expandedTaskId === task.id
 
+                      const isReplaced = !!task.replaced_at
+                      const isReplacing = replacingId === task.id
+                      const isConfirming = confirmingReplaceId === task.id
+
                       return (
                         <div
                           key={task.id}
                           className="text-xs rounded-lg border overflow-hidden"
                           style={{
                             borderColor: 'var(--color-border)',
-                            backgroundColor: done ? 'rgba(16,185,129,0.06)' : 'var(--color-surface)',
+                            backgroundColor: done ? 'rgba(16,185,129,0.06)' : isReplaced ? 'var(--color-surface-raised)' : 'var(--color-surface)',
+                            opacity: isReplacing ? 0.5 : 1,
                           }}
                         >
                           <div className="flex items-start gap-1.5 p-2">
                             {/* Completion toggle */}
                             <button
                               onClick={() => toggleTask(task)}
-                              disabled={isPending}
+                              disabled={isPending || isReplaced || isReplacing}
                               aria-label={done ? 'Mark incomplete' : 'Mark complete'}
                               className="flex-shrink-0 mt-0.5 cursor-pointer disabled:opacity-50"
                             >
@@ -330,7 +353,7 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
                             >
                               <div
                                 className="uppercase font-medium mb-0.5 truncate"
-                                style={{ color: 'var(--color-text-subtle)', fontSize: '0.65rem', opacity: done ? 0.6 : 1 }}
+                                style={{ color: 'var(--color-text-subtle)', fontSize: '0.65rem', opacity: done || isReplaced ? 0.5 : 1 }}
                               >
                                 {channelLabel(task)}
                               </div>
@@ -338,12 +361,15 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
                                 style={{
                                   color: 'var(--color-text)',
                                   fontSize: '0.8rem',
-                                  textDecoration: done ? 'line-through' : 'none',
-                                  opacity: done ? 0.6 : 1,
+                                  textDecoration: done || isReplaced ? 'line-through' : 'none',
+                                  opacity: done || isReplaced ? 0.6 : 1,
                                 }}
                               >
                                 {task.title}
                               </div>
+                              {isReplaced && !done && (
+                                <div style={{ fontSize: '0.65rem', color: 'var(--color-text-subtle)', marginTop: '2px' }}>Replaced</div>
+                              )}
                             </button>
                           </div>
 
@@ -359,6 +385,30 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
                               >
                                 {task.description}
                               </p>
+                            </div>
+                          )}
+
+                          {/* Not doable */}
+                          {!done && !isReplaced && !isReplacing && (
+                            <div className="px-2 pb-1.5">
+                              <button
+                                onClick={() => handleReplaceClick(task.id)}
+                                className="cursor-pointer text-left"
+                                style={{
+                                  fontSize: '0.65rem',
+                                  color: isConfirming ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: 0,
+                                }}
+                              >
+                                {isConfirming ? 'Confirm replace' : 'Not doable'}
+                              </button>
+                            </div>
+                          )}
+                          {isReplacing && (
+                            <div className="px-2 pb-1.5" style={{ fontSize: '0.65rem', color: 'var(--color-text-subtle)' }}>
+                              Replacing…
                             </div>
                           )}
                         </div>
