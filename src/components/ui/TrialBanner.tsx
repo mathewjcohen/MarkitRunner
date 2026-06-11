@@ -10,7 +10,7 @@ interface TrialBannerProps {
 export function TrialBanner({ daysLeft, tier }: TrialBannerProps) {
   const [dismissed, setDismissed] = useState(false)
 
-  if (dismissed || tier !== 'trial' || daysLeft > 7) {
+  if (dismissed || tier !== 'trial' || daysLeft <= 0 || daysLeft > 7) {
     return null
   }
 

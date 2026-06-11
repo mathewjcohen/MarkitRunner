@@ -13,7 +13,7 @@ export default async function AppLayout({
 }) {
   const usage = await getUsageWallState()
 
-  let daysLeft = 0
+  let daysLeft = 90
   let tier = 'trial'
   let onboardingComplete = true
   let deletionScheduledAt: string | null = null
