@@ -24,6 +24,7 @@ const mockLinkedinChannel: Channel = {
   type: 'linkedin',
   label: null,
   cadence: 'weekly',
+  platform_notes: null,
   is_active: true,
   created_at: '2026-01-01T00:00:00Z',
 }

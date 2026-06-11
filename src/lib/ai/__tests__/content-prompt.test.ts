@@ -24,6 +24,7 @@ const mockChannel: Channel = {
   type: 'instagram',
   label: null,
   cadence: 'weekly',
+  platform_notes: null,
   is_active: true,
   created_at: '2026-01-01T00:00:00Z',
 }
@@ -39,6 +40,7 @@ const mockTask: Task = {
   scheduled_date: '2026-06-09',
   completed_at: null,
   deferred_count: 0,
+  replaced_at: null,
   ai_prompt_angle: null,
   ai_prompt_opening: null,
   ai_prompt_generated_at: null,

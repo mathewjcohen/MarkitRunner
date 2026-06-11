@@ -87,6 +87,7 @@ export interface Channel {
   type: ChannelType
   label: string | null
   cadence: Cadence
+  platform_notes: string | null
   is_active: boolean
   created_at: string
 }
@@ -102,6 +103,7 @@ export interface Task {
   scheduled_date: string
   completed_at: string | null
   deferred_count: number
+  replaced_at: string | null
   ai_prompt_angle: string | null
   ai_prompt_opening: string | null
   ai_prompt_generated_at: string | null
