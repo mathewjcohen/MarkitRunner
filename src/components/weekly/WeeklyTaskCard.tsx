@@ -40,14 +40,14 @@ export function WeeklyTaskCard({ task }: WeeklyTaskCardProps) {
     <div
       className="text-xs rounded-lg p-2 border flex flex-col gap-1"
       style={{
-        borderColor: '#E8E4DC',
-        backgroundColor: task.completed_at ? '#F0FDF4' : isReplaced ? '#F7F5F1' : '#FFFFFF',
+        borderColor: 'var(--color-border)',
+        backgroundColor: task.completed_at ? 'color-mix(in srgb, #22C55E 12%, var(--color-surface))' : isReplaced ? 'var(--color-surface-raised)' : 'var(--color-surface)',
         opacity: replacing ? 0.5 : 1,
       }}
     >
       <div
         style={{
-          color: '#736C5E',
+          color: 'var(--color-text-muted)',
           fontSize: '0.7rem',
           fontWeight: 500,
           textTransform: 'uppercase',
@@ -58,7 +58,7 @@ export function WeeklyTaskCard({ task }: WeeklyTaskCardProps) {
       </div>
       <div
         style={{
-          color: '#18160F',
+          color: 'var(--color-text)',
           fontSize: '0.85rem',
           opacity: task.completed_at || isReplaced ? 0.6 : 1,
           textDecoration: task.completed_at || isReplaced ? 'line-through' : 'none',
@@ -70,7 +70,7 @@ export function WeeklyTaskCard({ task }: WeeklyTaskCardProps) {
         <div style={{ color: '#22C55E', fontSize: '0.75rem' }}>Done</div>
       )}
       {isReplaced && !task.completed_at && (
-        <div style={{ color: '#A89F94', fontSize: '0.75rem' }}>Replaced</div>
+        <div style={{ color: 'var(--color-text-subtle)', fontSize: '0.75rem' }}>Replaced</div>
       )}
       {!task.completed_at && !isReplaced && !replacing && (
         <button
@@ -78,7 +78,7 @@ export function WeeklyTaskCard({ task }: WeeklyTaskCardProps) {
           className="text-left cursor-pointer mt-0.5"
           style={{
             fontSize: '0.7rem',
-            color: confirmingReplace ? '#B8601F' : '#8B8177',
+            color: confirmingReplace ? 'var(--color-accent)' : 'var(--color-text-muted)',
             background: 'none',
             border: 'none',
             padding: 0,
@@ -88,7 +88,7 @@ export function WeeklyTaskCard({ task }: WeeklyTaskCardProps) {
         </button>
       )}
       {replacing && (
-        <div style={{ fontSize: '0.7rem', color: '#A89F94' }}>Replacing…</div>
+        <div style={{ fontSize: '0.7rem', color: 'var(--color-text-subtle)' }}>Replacing…</div>
       )}
     </div>
   )

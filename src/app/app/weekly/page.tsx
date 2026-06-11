@@ -40,11 +40,11 @@ export default async function WeeklyPage() {
       <div className="mb-8">
         <h1
           className="text-2xl font-semibold"
-          style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text)' }}
         >
           This Week
         </h1>
-        <p className="text-sm mt-1" style={{ color: '#736C5E' }}>
+        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
           {dateRangeText}
         </p>
       </div>
@@ -61,8 +61,8 @@ export default async function WeeklyPage() {
             key={dayInfo.date}
             className="rounded-xl border"
             style={{
-              borderColor: isToday(dayInfo.date) ? '#B8601F' : '#E8E4DC',
-              backgroundColor: isToday(dayInfo.date) ? '#FDF8F4' : '#FFFFFF',
+              borderColor: isToday(dayInfo.date) ? 'var(--color-accent)' : 'var(--color-border)',
+              backgroundColor: isToday(dayInfo.date) ? 'var(--color-accent-subtle)' : 'var(--color-surface)',
               borderLeftWidth: isToday(dayInfo.date) ? '4px' : '1px',
             }}
           >
@@ -70,8 +70,8 @@ export default async function WeeklyPage() {
             <div
               className="px-4 py-3 border-b font-semibold text-sm"
               style={{
-                borderBottomColor: '#E8E4DC',
-                color: isToday(dayInfo.date) ? '#B8601F' : '#18160F',
+                borderBottomColor: 'var(--color-border)',
+                color: isToday(dayInfo.date) ? 'var(--color-accent)' : 'var(--color-text)',
                 fontFamily: 'var(--font-display)',
               }}
             >
@@ -90,7 +90,7 @@ export default async function WeeklyPage() {
               ) : (
                 <div
                   className="text-xs text-center py-8 flex items-center justify-center h-full"
-                  style={{ color: '#E8E4DC' }}
+                  style={{ color: 'var(--color-border)' }}
                 >
                   —
                 </div>
