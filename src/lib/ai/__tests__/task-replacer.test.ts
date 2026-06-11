@@ -38,7 +38,7 @@ describe('buildReplacementPrompt', () => {
 
   it('includes platform context for marketplace', () => {
     const prompt = buildReplacementPrompt('2026-06-11', mockBusiness, mockMarketplaceChannel, 'Any task')
-    expect(prompt).toContain('Transactional sales platform')
+    expect(prompt).toContain('transactional sales platform')
   })
 
   it('includes channel platform_notes', () => {
