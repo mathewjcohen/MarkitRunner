@@ -1,6 +1,7 @@
 import { getTasksForWeek } from '@/actions/tasks'
 import { getBusinesses } from '@/actions/businesses'
 import { GeneratePlanButton } from '@/components/weekly/GeneratePlanButton'
+import { WeeklyTaskCard } from '@/components/weekly/WeeklyTaskCard'
 import { buildWeekRange, getWeekDates, formatDateRange, isToday } from '@/lib/utils/date'
 import type { Task, Business } from '@/types'
 
@@ -84,53 +85,7 @@ export default async function WeeklyPage() {
             <div className="px-4 py-3 flex flex-col gap-3 min-h-48">
               {tasksByDate[dayInfo.date]?.length > 0 ? (
                 tasksByDate[dayInfo.date].map((task) => (
-                  <div
-                    key={task.id}
-                    className="text-xs rounded-lg p-2 border flex flex-col gap-1"
-                    style={{
-                      borderColor: '#E8E4DC',
-                      backgroundColor: task.completed_at ? '#F0FDF4' : '#FFFFFF',
-                    }}
-                  >
-                    {/* Channel label */}
-                    <div
-                      style={{
-                        color: '#736C5E',
-                        fontSize: '0.7rem',
-                        fontWeight: 500,
-                        textTransform: 'uppercase',
-                        opacity: task.completed_at ? 0.6 : 1,
-                      }}
-                    >
-                      {task.channels?.label || task.channels?.type || 'Unknown'}
-                    </div>
-
-                    {/* Task title */}
-                    <div
-                      style={{
-                        color: '#18160F',
-                        fontSize: '0.85rem',
-                        fontWeight: task.completed_at ? 'normal' : 'semibold',
-                        opacity: task.completed_at ? 0.6 : 1,
-                        textDecoration: task.completed_at ? 'line-through' : 'none',
-                      }}
-                    >
-                      {task.title}
-                    </div>
-
-                    {/* Completion indicator */}
-                    {task.completed_at && (
-                      <div
-                        style={{
-                          color: '#22C55E',
-                          fontSize: '0.75rem',
-                          marginTop: '0.25rem',
-                        }}
-                      >
-                        ✓ Done
-                      </div>
-                    )}
-                  </div>
+                  <WeeklyTaskCard key={task.id} task={task} />
                 ))
               ) : (
                 <div
