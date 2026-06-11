@@ -51,6 +51,7 @@ export interface User {
   trial_ends_at: string | null
   stripe_customer_id: string | null
   stripe_subscription_id: string | null
+  deletion_scheduled_at: string | null
 }
 
 export interface Profile {
@@ -75,6 +76,7 @@ export interface Business {
   sort_order: number
   is_active: boolean
   created_at: string
+  archived_at: string | null
 }
 
 export interface Channel {

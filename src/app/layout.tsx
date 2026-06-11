@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Fraunces, Plus_Jakarta_Sans } from 'next/font/google'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import './globals.css'
 
 const fraunces = Fraunces({
@@ -20,8 +21,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${jakarta.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">{children}</body>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${jakarta.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   )
 }

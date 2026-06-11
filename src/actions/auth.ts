@@ -75,3 +75,34 @@ export async function completeOnboarding() {
   if (error) return { error: error.message }
   return { success: true }
 }
+
+export async function scheduleAccountDeletion() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const deletionDate = new Date()
+  deletionDate.setDate(deletionDate.getDate() + 30)
+
+  const { error } = await supabase
+    .from('users')
+    .update({ deletion_scheduled_at: deletionDate.toISOString() })
+    .eq('id', user.id)
+
+  if (error) return { error: error.message }
+  return { success: true, deletionDate: deletionDate.toISOString() }
+}
+
+export async function cancelAccountDeletion() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('users')
+    .update({ deletion_scheduled_at: null })
+    .eq('id', user.id)
+
+  if (error) return { error: error.message }
+  return { success: true }
+}

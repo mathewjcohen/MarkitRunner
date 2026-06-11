@@ -75,17 +75,116 @@ export async function updateBusiness(
   return { data }
 }
 
-export async function getBusinesses() {
+export async function getBusinesses(includeArchived = false) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('is_active', true)
-    .order('sort_order')
+  let query = supabase.from('businesses').select('*').eq('user_id', user.id).order('sort_order')
 
+  if (!includeArchived) {
+    query = query.is('archived_at', null)
+  }
+
+  const { data } = await query
   return data ?? []
+}
+
+export async function pauseBusiness(businessId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('businesses')
+    .update({ is_active: false })
+    .eq('id', businessId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/app/dashboard')
+  return { success: true }
+}
+
+export async function resumeBusiness(businessId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('businesses')
+    .update({ is_active: true })
+    .eq('id', businessId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/app/dashboard')
+  return { success: true }
+}
+
+export async function archiveBusiness(businessId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('businesses')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', businessId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/app/dashboard')
+  return { success: true }
+}
+
+export async function restoreBusiness(businessId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('businesses')
+    .update({ archived_at: null, is_active: true })
+    .eq('id', businessId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/app/dashboard')
+  return { success: true }
+}
+
+export async function deleteBusiness(businessId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('businesses')
+    .delete()
+    .eq('id', businessId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/app/dashboard')
+  return { success: true }
+}
+
+export async function purgeExpiredArchives() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 30)
+
+  const { error } = await supabase
+    .from('businesses')
+    .delete()
+    .eq('user_id', user.id)
+    .not('archived_at', 'is', null)
+    .lt('archived_at', cutoff.toISOString())
+
+  if (error) return { error: error.message }
+  return { success: true }
 }

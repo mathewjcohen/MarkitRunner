@@ -1,5 +1,6 @@
 import type { Business, Channel } from '@/types'
 import { BusinessCardActions } from './BusinessCardActions'
+import { BusinessCardMenu } from './BusinessCardMenu'
 
 interface BusinessCardProps {
   business: Business
@@ -25,21 +26,42 @@ export function BusinessCard({
     : null
 
   return (
-    <div className="rounded-2xl p-6 border" style={{ backgroundColor: '#FFFFFF', borderColor: '#E8E4DC' }}>
+    <div
+      className="rounded-2xl p-6 border"
+      style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+    >
       <div className="flex items-start justify-between mb-4">
-        <div>
-          <h2 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}>
-            {business.name}
-          </h2>
-          <p className="text-sm mt-0.5" style={{ color: '#736C5E' }}>{business.description}</p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text)' }}>
+              {business.name}
+            </h2>
+            {!business.is_active && (
+              <span
+                className="text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
+              >
+                Paused
+              </span>
+            )}
+          </div>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{business.description}</p>
         </div>
-        {consistencyPct !== null && (
-          <span className="text-2xl font-bold" style={{ color: '#B8601F', fontFamily: 'var(--font-display)' }}>
-            {consistencyPct}%
-          </span>
-        )}
+        <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+          {consistencyPct !== null && (
+            <span className="text-2xl font-bold" style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-display)' }}>
+              {consistencyPct}%
+            </span>
+          )}
+          <BusinessCardMenu
+            businessId={business.id}
+            businessName={business.name}
+            isActive={business.is_active}
+            archivedAt={business.archived_at}
+          />
+        </div>
       </div>
-      <div className="flex gap-4 text-sm" style={{ color: '#736C5E' }}>
+      <div className="flex gap-4 text-sm flex-wrap" style={{ color: 'var(--color-text-muted)' }}>
         <span>{channels.length} channel{channels.length !== 1 ? 's' : ''}</span>
         {daysSinceLastTask !== null && (
           <span>{daysSinceLastTask === 0 ? 'Active today' : `${daysSinceLastTask}d since last task`}</span>

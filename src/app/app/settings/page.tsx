@@ -3,6 +3,7 @@ import { getUsageWallState } from '@/actions/usage'
 import { SettingsSignOut } from '@/components/settings/SettingsSignOut'
 import { SettingsPasswordReset } from '@/components/settings/SettingsPasswordReset'
 import { SettingsBillingButton } from '@/components/settings/SettingsBillingButton'
+import { SettingsDeleteAccount } from '@/components/settings/SettingsDeleteAccount'
 import { redirect } from 'next/navigation'
 
 const TIER_LABELS: Record<string, string> = {
@@ -17,64 +18,65 @@ export default async function SettingsPage() {
   if (!user) redirect('/login')
 
   const [{ data: userData }, usage] = await Promise.all([
-    supabase.from('users').select('tier, trial_ends_at, stripe_customer_id').eq('id', user.id).single(),
+    supabase.from('users').select('tier, trial_ends_at, stripe_customer_id, deletion_scheduled_at').eq('id', user.id).single(),
     getUsageWallState(),
   ])
 
   const tier = userData?.tier ?? 'trial'
   const trialEndsAt = userData?.trial_ends_at
   const hasStripeCustomer = !!userData?.stripe_customer_id
+  const deletionScheduledAt = userData?.deletion_scheduled_at ?? null
 
   const daysLeft = trialEndsAt
     ? Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)
     : null
 
   const usagePct = Math.min(100, (usage.used / usage.limit) * 100)
-  const barColor = usagePct >= 100 ? '#DC2626' : usagePct >= 80 ? '#D97706' : '#B8601F'
+  const barColor = usagePct >= 100 ? '#DC2626' : usagePct >= 80 ? '#D97706' : 'var(--color-accent)'
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       <h1
         className="text-2xl font-semibold mb-8"
-        style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
+        style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text)' }}
       >
         Settings
       </h1>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 max-w-2xl">
         {/* Account */}
         <section>
           <h2
             className="text-xs font-semibold mb-3 uppercase tracking-widest"
-            style={{ color: '#A89F94' }}
+            style={{ color: 'var(--color-text-subtle)' }}
           >
             Account
           </h2>
           <div
             className="rounded-2xl border overflow-hidden"
-            style={{ backgroundColor: '#FFFFFF', borderColor: '#E8E4DC' }}
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             <div
               className="px-5 py-4 border-b"
-              style={{ borderColor: '#E8E4DC' }}
+              style={{ borderColor: 'var(--color-border)' }}
             >
-              <p className="text-xs mb-1" style={{ color: '#736C5E' }}>
+              <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>
                 Email address
               </p>
-              <p className="text-sm font-medium" style={{ color: '#18160F' }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                 {user.email}
               </p>
             </div>
 
             <div
               className="px-5 py-4 border-b flex items-center justify-between"
-              style={{ borderColor: '#E8E4DC' }}
+              style={{ borderColor: 'var(--color-border)' }}
             >
               <div>
-                <p className="text-sm font-medium" style={{ color: '#18160F' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                   Password
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: '#736C5E' }}>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                   Send a reset link to your email address
                 </p>
               </div>
@@ -82,7 +84,7 @@ export default async function SettingsPage() {
             </div>
 
             <div className="px-5 py-4 flex items-center justify-between">
-              <p className="text-sm font-medium" style={{ color: '#18160F' }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                 Sign out of MarkitRunner
               </p>
               <SettingsSignOut />
@@ -94,29 +96,29 @@ export default async function SettingsPage() {
         <section>
           <h2
             className="text-xs font-semibold mb-3 uppercase tracking-widest"
-            style={{ color: '#A89F94' }}
+            style={{ color: 'var(--color-text-subtle)' }}
           >
             Plan & Billing
           </h2>
           <div
             className="rounded-2xl border overflow-hidden"
-            style={{ backgroundColor: '#FFFFFF', borderColor: '#E8E4DC' }}
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             <div
               className="px-5 py-4 border-b flex items-center justify-between"
-              style={{ borderColor: '#E8E4DC' }}
+              style={{ borderColor: 'var(--color-border)' }}
             >
               <div>
-                <p className="text-xs mb-1" style={{ color: '#736C5E' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>
                   Current plan
                 </p>
-                <p className="text-sm font-medium" style={{ color: '#18160F' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                   {TIER_LABELS[tier] ?? tier}
                 </p>
                 {tier === 'trial' && daysLeft !== null && (
                   <p
                     className="text-xs mt-0.5"
-                    style={{ color: daysLeft <= 3 ? '#DC2626' : '#736C5E' }}
+                    style={{ color: daysLeft <= 3 ? '#DC2626' : 'var(--color-text-muted)' }}
                   >
                     {daysLeft > 0 ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining` : 'Trial expired'}
                   </p>
@@ -126,7 +128,7 @@ export default async function SettingsPage() {
                 <a
                   href="/upgrade"
                   className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer transition-opacity hover:opacity-80"
-                  style={{ backgroundColor: '#B8601F', color: '#FFFFFF' }}
+                  style={{ backgroundColor: 'var(--color-accent)', color: '#FFFFFF' }}
                 >
                   Upgrade
                 </a>
@@ -144,9 +146,9 @@ export default async function SettingsPage() {
               )}
             </div>
 
-            <div className="px-5 py-4" style={{ borderColor: '#E8E4DC' }}>
+            <div className="px-5 py-4" style={{ borderColor: 'var(--color-border)' }}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium" style={{ color: '#18160F' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                   AI actions this month
                 </p>
                 <p className="text-sm font-semibold" style={{ color: barColor }}>
@@ -155,7 +157,7 @@ export default async function SettingsPage() {
               </div>
               <div
                 className="h-1.5 rounded-full overflow-hidden"
-                style={{ backgroundColor: '#E8E4DC' }}
+                style={{ backgroundColor: 'var(--color-border)' }}
               >
                 <div
                   className="h-full rounded-full transition-all"
@@ -165,7 +167,7 @@ export default async function SettingsPage() {
               {usage.atLimit && (
                 <p className="text-xs mt-2" style={{ color: '#DC2626' }}>
                   Monthly limit reached.{' '}
-                  <a href="/upgrade" className="underline cursor-pointer" style={{ color: '#B8601F' }}>
+                  <a href="/upgrade" className="underline cursor-pointer" style={{ color: 'var(--color-accent)' }}>
                     Upgrade to continue
                   </a>
                 </p>
@@ -175,13 +177,13 @@ export default async function SettingsPage() {
             {hasStripeCustomer && (
               <div
                 className="px-5 py-4 border-t flex items-center justify-between"
-                style={{ borderColor: '#E8E4DC' }}
+                style={{ borderColor: 'var(--color-border)' }}
               >
                 <div>
-                  <p className="text-sm font-medium" style={{ color: '#18160F' }}>
+                  <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                     Billing
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: '#736C5E' }}>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                     Update payment method, view invoices, or cancel
                   </p>
                 </div>
@@ -195,27 +197,15 @@ export default async function SettingsPage() {
         <section>
           <h2
             className="text-xs font-semibold mb-3 uppercase tracking-widest"
-            style={{ color: '#A89F94' }}
+            style={{ color: 'var(--color-text-subtle)' }}
           >
             Danger Zone
           </h2>
           <div
-            className="rounded-2xl border px-5 py-4"
-            style={{ backgroundColor: '#FFFFFF', borderColor: '#E8E4DC' }}
+            className="rounded-2xl border overflow-hidden"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
-            <p className="text-sm font-medium mb-1" style={{ color: '#18160F' }}>
-              Delete account
-            </p>
-            <p className="text-sm" style={{ color: '#736C5E' }}>
-              To permanently delete your account and all data, email{' '}
-              <a
-                href="mailto:support@markitrunner.com"
-                className="underline cursor-pointer"
-                style={{ color: '#B8601F' }}
-              >
-                support@markitrunner.com
-              </a>
-            </p>
+            <SettingsDeleteAccount deletionScheduledAt={deletionScheduledAt} />
           </div>
         </section>
       </div>

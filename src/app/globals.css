@@ -3,12 +3,27 @@
 @theme {
   --color-bg: #F7F5F1;
   --color-surface: #FFFFFF;
+  --color-surface-raised: #F0EDE7;
   --color-text: #18160F;
   --color-text-muted: #736C5E;
+  --color-text-subtle: #A89F94;
   --color-border: #E8E4DC;
   --color-accent: #B8601F;
   --color-accent-hover: #9A4F17;
   --color-accent-subtle: #FEF0E6;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0E0D0A;
+  --color-surface: #1A1813;
+  --color-surface-raised: #221F19;
+  --color-text: #F0EDE7;
+  --color-text-muted: #8B8478;
+  --color-text-subtle: #5C5650;
+  --color-border: #2C2820;
+  --color-accent: #D4752A;
+  --color-accent-hover: #BB6320;
+  --color-accent-subtle: #2A1C0F;
 }
 
 @keyframes slideInUp {
@@ -21,6 +36,6 @@
 }
 
 body {
-  background: #F7F5F1;
-  color: #18160F;
+  background: var(--color-bg);
+  color: var(--color-text);
 }

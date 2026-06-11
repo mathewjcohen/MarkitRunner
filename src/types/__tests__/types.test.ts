@@ -14,6 +14,7 @@ describe('type contracts', () => {
       cold_start_notes: null,
       sort_order: 0,
       is_active: true,
+      archived_at: null,
       created_at: new Date().toISOString(),
     }
     expect(b.content_themes).toHaveLength(3)

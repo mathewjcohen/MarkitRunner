@@ -17,17 +17,17 @@ export function TrialBanner({ daysLeft, tier }: TrialBannerProps) {
   return (
     <div
       className="sticky top-14 z-[9] border-b"
-      style={{ backgroundColor: '#FFFBF5', borderColor: '#E8E4DC' }}
+      style={{ backgroundColor: 'var(--color-accent-subtle)', borderColor: 'var(--color-border)' }}
     >
-      <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span style={{ color: '#B8601F', fontSize: '14px', fontWeight: '500' }}>
+          <span style={{ color: 'var(--color-accent)', fontSize: '14px', fontWeight: '500' }}>
             {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left in your trial
           </span>
           <a
             href="/upgrade"
             className="text-sm underline cursor-pointer transition-opacity hover:opacity-70"
-            style={{ color: '#B8601F' }}
+            style={{ color: 'var(--color-accent)' }}
           >
             Upgrade now
           </a>
@@ -35,7 +35,7 @@ export function TrialBanner({ daysLeft, tier }: TrialBannerProps) {
         <button
           onClick={() => setDismissed(true)}
           className="text-lg leading-none cursor-pointer transition-opacity hover:opacity-50"
-          style={{ color: '#736C5E' }}
+          style={{ color: 'var(--color-text-muted)' }}
           aria-label="Dismiss"
         >
           ×

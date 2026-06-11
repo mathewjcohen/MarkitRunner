@@ -23,12 +23,12 @@ export function BusinessCardActions({ businessId, weekStartDate, hasTasks }: Bus
       setError(result.error)
       setLoading(false)
     } else {
-      router.push('/app/weekly')
+      router.push('/app/dashboard')
     }
   }
 
   return (
-    <div className="flex flex-col gap-2 mt-4 pt-4 border-t" style={{ borderColor: '#E8E4DC' }}>
+    <div className="flex flex-col gap-2 mt-4 pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
       {error && (
         <p className="text-xs" style={{ color: '#991B1B' }}>{error}</p>
       )}
@@ -37,26 +37,19 @@ export function BusinessCardActions({ businessId, weekStartDate, hasTasks }: Bus
           onClick={handleGeneratePlan}
           disabled={loading}
           className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer transition-opacity disabled:opacity-60 hover:opacity-80"
-          style={{ backgroundColor: '#B8601F', color: '#FFFFFF' }}
+          style={{ backgroundColor: 'var(--color-accent)', color: '#FFFFFF' }}
         >
           {loading ? 'Generating…' : hasTasks ? 'Regenerate plan' : 'Generate plan'}
         </button>
         {hasTasks && (
           <a
-            href="/app/weekly"
+            href="/app/dashboard"
             className="text-sm font-medium cursor-pointer transition-opacity hover:opacity-70"
-            style={{ color: '#B8601F' }}
+            style={{ color: 'var(--color-accent)' }}
           >
             View week →
           </a>
         )}
-        <a
-          href="/app/today"
-          className="text-sm cursor-pointer transition-opacity hover:opacity-70"
-          style={{ color: '#736C5E' }}
-        >
-          Today
-        </a>
       </div>
     </div>
   )

@@ -51,6 +51,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Failed to update profiles' }, { status: 500 })
     }
 
+    // Purge businesses archived more than 30 days ago
+    const archiveCutoff = new Date()
+    archiveCutoff.setDate(archiveCutoff.getDate() - 30)
+
+    const { error: purgeError } = await supabase
+      .from('businesses')
+      .delete()
+      .not('archived_at', 'is', null)
+      .lt('archived_at', archiveCutoff.toISOString())
+
+    if (purgeError) {
+      console.error('Error purging archived businesses:', purgeError)
+    }
+
     return NextResponse.json({ reset: profiles.length })
   } catch (err) {
     console.error('Unexpected error in weekly-reset:', err)

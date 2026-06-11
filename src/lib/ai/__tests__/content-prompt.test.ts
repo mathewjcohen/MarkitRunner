@@ -13,6 +13,7 @@ const mockBusiness: Business = {
   cold_start_notes: null,
   sort_order: 0,
   is_active: true,
+  archived_at: null,
   created_at: '2026-01-01T00:00:00Z',
 }
 
