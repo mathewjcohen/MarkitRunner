@@ -5,6 +5,7 @@ import { SettingsPasswordReset } from '@/components/settings/SettingsPasswordRes
 import { SettingsBillingButton } from '@/components/settings/SettingsBillingButton'
 import { SettingsDeleteAccount } from '@/components/settings/SettingsDeleteAccount'
 import { SettingsWeekStart } from '@/components/settings/SettingsWeekStart'
+import { SettingsChannels } from '@/components/settings/SettingsChannels'
 import { redirect } from 'next/navigation'
 
 const TIER_LABELS: Record<string, string> = {
@@ -18,10 +19,16 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: userData }, { data: profileData }, usage] = await Promise.all([
+  const [{ data: userData }, { data: profileData }, usage, { data: channelsData }] = await Promise.all([
     supabase.from('users').select('tier, trial_ends_at, stripe_customer_id, deletion_scheduled_at').eq('id', user.id).single(),
     supabase.from('profiles').select('week_start_day').eq('id', user.id).single(),
     getUsageWallState(),
+    supabase
+      .from('channels')
+      .select('id, type, label, platform_notes, businesses(name)')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .order('created_at'),
   ])
 
   const tier = userData?.tier ?? 'trial'
@@ -29,6 +36,17 @@ export default async function SettingsPage() {
   const hasStripeCustomer = !!userData?.stripe_customer_id
   const deletionScheduledAt = userData?.deletion_scheduled_at ?? null
   const weekStartDay = profileData?.week_start_day ?? 1
+
+  const channels = (channelsData ?? []).map((c) => {
+    const business = Array.isArray(c.businesses) ? c.businesses[0] : c.businesses
+    return {
+      id: c.id,
+      type: c.type,
+      label: (c.label as string | null) ?? null,
+      platform_notes: (c.platform_notes as string | null) ?? null,
+      businessName: (business as { name: string } | null)?.name ?? '',
+    }
+  })
 
   const daysLeft = trialEndsAt
     ? Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)
@@ -211,6 +229,25 @@ export default async function SettingsPage() {
             <div className="px-5 py-4">
               <SettingsWeekStart currentDay={weekStartDay} />
             </div>
+          </div>
+        </section>
+
+        {/* Channels */}
+        <section>
+          <h2
+            className="text-xs font-semibold mb-3 uppercase tracking-widest"
+            style={{ color: 'var(--color-text-subtle)' }}
+          >
+            Channels
+          </h2>
+          <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>
+            Add platform notes so the AI generates accurate tasks for each channel.
+          </p>
+          <div
+            className="rounded-2xl border overflow-hidden"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <SettingsChannels channels={channels} />
           </div>
         </section>
 
