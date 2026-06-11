@@ -57,6 +57,28 @@ describe('buildPlanPrompt', () => {
     const prompt = buildPlanPrompt(biz, [mockLinkedinChannel], '2026-06-09')
     expect(prompt).toContain('Just launched last week')
   })
+
+  it('includes marketplace platform constraint in prompt', () => {
+    const marketplaceChannel: Channel = {
+      ...mockLinkedinChannel,
+      id: 'c2',
+      type: 'marketplace',
+      label: 'Reverb',
+      platform_notes: null,
+    }
+    const prompt = buildPlanPrompt(mockBusiness, [marketplaceChannel], '2026-06-09')
+    expect(prompt).toContain('transactional sales platform')
+    expect(prompt).toContain('Do NOT suggest community posts')
+  })
+
+  it('includes channel platform_notes when present', () => {
+    const channelWithNotes: Channel = {
+      ...mockLinkedinChannel,
+      platform_notes: 'Reverb.com — music gear sales only',
+    }
+    const prompt = buildPlanPrompt(mockBusiness, [channelWithNotes], '2026-06-09')
+    expect(prompt).toContain('Reverb.com — music gear sales only')
+  })
 })
 
 describe('validatePlanOutput', () => {

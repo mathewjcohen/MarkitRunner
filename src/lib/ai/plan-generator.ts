@@ -1,17 +1,17 @@
 import type { Business, Channel, ChannelType, WeeklyPlanOutput } from '@/types'
 
 export const PLATFORM_CONTEXT: Record<ChannelType, string> = {
-  discord: 'Community-focused chat platform; suited for discussion, updates, and community engagement',
-  instagram: 'Visual social media platform; focus on high-quality images and short video reels',
-  youtube: 'Long-form video platform; requires substantial production effort for quality content',
-  email_newsletter: 'Direct email communication; best for updates, curated insights, and building relationships',
-  reddit: 'Discussion forum; community-driven conversations and niche communities',
-  tiktok: 'Short-form vertical video; fast-paced, trend-driven, requires consistent posting',
-  linkedin: 'Professional network; B2B focused, thought leadership and industry insights',
-  facebook: 'Broad social platform; groups, events, and community discussions',
-  forum: 'Niche discussion platform; deep conversations and community knowledge building',
-  marketplace: 'Transactional sales platform; focus on product listings, sales, and commerce',
-  website_blog: 'Owned content platform; SEO-friendly long-form articles and guides',
+  discord: 'A community text/voice platform. Post in channels, host events, share updates, and engage in discussions. Can include links, images, and announcements.',
+  instagram: 'A visual social platform. Create image/video posts, Reels, and Stories. Growth via hashtags, consistent posting, and engagement.',
+  youtube: 'A video platform. Publish long-form videos, Shorts, or Community posts. Growth via SEO, thumbnails, and upload consistency.',
+  email_newsletter: 'A direct-to-inbox owned channel. Write and send newsletters, product updates, or drip sequences. High trust, no algorithm.',
+  reddit: 'A community forum of subreddits. Share posts, comment in discussions, and answer questions. Rules vary by subreddit — add genuine value before any promotion.',
+  tiktok: 'A short-form vertical video platform. Hook-driven 15–60 second clips. Organic reach via algorithm, trends, and sounds.',
+  linkedin: 'A professional networking platform. Share thought leadership, industry insights, company updates, and career content.',
+  facebook: 'A social networking platform. Post in Groups, on Pages, and in the feed. Events and community groups are effective for engagement.',
+  forum: 'A niche topic-specific online forum. Participate in threads, answer questions, share resources. Build reputation before promoting.',
+  marketplace: 'A transactional sales platform (e.g. Reverb, Etsy, eBay). Focused exclusively on product listings, pricing, promotions, and sales copy. Do NOT suggest community posts, discussion threads, Q&A, or engagement tactics unrelated to a product listing.',
+  website_blog: 'Your own website or blog. Publish SEO articles, guides, landing pages, or case studies. Fully owned, no algorithm dependency.',
 }
 
 export function buildPlanPrompt(
@@ -20,7 +20,12 @@ export function buildPlanPrompt(
   weekStart: string
 ): string {
   const channelList = channels
-    .map((c) => `- ${c.type}${c.label ? ` (${c.label})` : ''} — ${c.cadence}`)
+    .map((c) => {
+      const label = c.type + (c.label ? ` (${c.label})` : '')
+      const context = PLATFORM_CONTEXT[c.type as ChannelType] ?? ''
+      const notes = c.platform_notes ? `\n  User notes: ${c.platform_notes}` : ''
+      return `- ${label} — ${c.cadence}\n  Platform: ${context}${notes}`
+    })
     .join('\n')
 
   return `You are a marketing coach helping an indie founder stay consistent.
@@ -40,6 +45,7 @@ Generate a weekly marketing plan for the week starting ${weekStart}.
 Rules:
 - One task per channel per cadence period (daily channels get 5 tasks Mon-Fri, weekly channels get 1 task)
 - Each task needs a clear, specific action (not vague advice)
+- Tasks MUST be feasible on the described platform — respect the Platform constraints for each channel
 - scheduled_date must be YYYY-MM-DD format, within the week starting ${weekStart}
 - Tasks should align with the primary goal: ${business.primary_goal.replace(/_/g, ' ')}
 
