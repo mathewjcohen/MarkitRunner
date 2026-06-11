@@ -138,6 +138,15 @@ export async function replaceTask(taskId: string) {
 
   if (markError) return { error: markError.message }
 
+  // If the channel was removed, mark as replaced but don't generate a new task for it
+  const channel = task.channels as Channel | null
+  if (!channel || !channel.is_active) {
+    revalidatePath('/app/today')
+    revalidatePath('/app/weekly')
+    revalidatePath('/app/dashboard')
+    return { success: true }
+  }
+
   const prompt = buildReplacementPrompt(
     task.scheduled_date,
     task.businesses as Business,
