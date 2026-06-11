@@ -62,9 +62,14 @@ export function ArchivedSection({ businesses }: ArchivedSectionProps) {
                 <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-muted)' }}>
                   {b.name}
                 </p>
+                {b.description && (
+                  <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-subtle)' }}>
+                    {b.description}
+                  </p>
+                )}
                 {daysLeft !== null && daysLeft > 0 && (
                   <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-subtle)' }}>
-                    Permanently deleted in {daysLeft} day{daysLeft !== 1 ? 's' : ''}
+                    Auto-deleted in {daysLeft} day{daysLeft !== 1 ? 's' : ''}
                   </p>
                 )}
               </div>
