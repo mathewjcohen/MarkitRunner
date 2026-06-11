@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { Task, Business, Channel } from '@/types'
 import { isToday } from '@/lib/utils/date'
+import { formatChannelType } from '@/lib/utils/format'
+import { completeTask, uncompleteTask } from '@/actions/tasks'
 
 interface TaskWithRelations extends Task {
   businesses: { name: string } | null
@@ -24,13 +27,17 @@ interface BusinessWithData {
 interface DashboardTabsProps {
   businessesWithData: BusinessWithData[]
   weekDates: Array<{ date: string; dayName: string; dayNum: number }>
-  defaultTab?: 'today' | 'weekly'
+  activeTab: 'today' | 'weekly'
+  onTabChange: (tab: 'today' | 'weekly') => void
 }
 
 type Tab = 'today' | 'weekly'
 
-export function DashboardTabs({ businessesWithData, weekDates, defaultTab = 'today' }: DashboardTabsProps) {
-  const [activeTab, setActiveTab] = useState<Tab>(defaultTab)
+export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabChange }: DashboardTabsProps) {
+  const router = useRouter()
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
+  const [localCompletions, setLocalCompletions] = useState<Record<string, boolean>>({})
 
   const allWeekTasks = businessesWithData.flatMap((b) => b.weekTasks)
   const tasksByDate = allWeekTasks.reduce(
@@ -42,6 +49,40 @@ export function DashboardTabs({ businessesWithData, weekDates, defaultTab = 'tod
     {} as Record<string, TaskWithRelations[]>
   )
 
+  function isCompleted(task: TaskWithRelations): boolean {
+    if (task.id in localCompletions) return localCompletions[task.id]
+    return !!task.completed_at
+  }
+
+  async function toggleTask(task: TaskWithRelations) {
+    if (pendingTaskId) return
+    const wasCompleted = isCompleted(task)
+
+    setPendingTaskId(task.id)
+    setLocalCompletions((prev) => ({ ...prev, [task.id]: !wasCompleted }))
+
+    const result = wasCompleted ? await uncompleteTask(task.id) : await completeTask(task.id)
+
+    if (result?.error) {
+      setLocalCompletions((prev) => {
+        const next = { ...prev }
+        delete next[task.id]
+        return next
+      })
+    }
+
+    setPendingTaskId(null)
+    router.refresh()
+  }
+
+  function toggleExpanded(taskId: string) {
+    setExpandedTaskId((prev) => (prev === taskId ? null : taskId))
+  }
+
+  function channelLabel(task: TaskWithRelations): string {
+    return task.channels?.label || (task.channels?.type ? formatChannelType(task.channels.type) : 'Task')
+  }
+
   return (
     <div>
       <div
@@ -51,7 +92,7 @@ export function DashboardTabs({ businessesWithData, weekDates, defaultTab = 'tod
         {(['today', 'weekly'] as Tab[]).map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => onTabChange(tab)}
             className="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all capitalize"
             style={{
               backgroundColor: activeTab === tab ? 'var(--color-accent)' : 'transparent',
@@ -79,41 +120,116 @@ export function DashboardTabs({ businessesWithData, weekDates, defaultTab = 'tod
                 </p>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {todayTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="rounded-xl border px-4 py-3"
-                      style={{
-                        backgroundColor: task.completed_at ? 'var(--color-surface-raised)' : 'var(--color-surface)',
-                        borderColor: 'var(--color-border)',
-                      }}
-                    >
+                  {todayTasks.map((task) => {
+                    const done = isCompleted(task)
+                    const isPending = pendingTaskId === task.id
+                    const isExpanded = expandedTaskId === task.id
+
+                    return (
                       <div
-                        className="text-xs font-medium uppercase tracking-wider mb-1"
+                        key={task.id}
+                        className="rounded-xl border overflow-hidden"
                         style={{
-                          color: 'var(--color-text-subtle)',
-                          opacity: task.completed_at ? 0.6 : 1,
+                          backgroundColor: done ? 'var(--color-surface-raised)' : 'var(--color-surface)',
+                          borderColor: 'var(--color-border)',
                         }}
                       >
-                        {task.channels?.label || task.channels?.type || 'Task'}
-                      </div>
-                      <div
-                        className="text-sm"
-                        style={{
-                          color: 'var(--color-text)',
-                          textDecoration: task.completed_at ? 'line-through' : 'none',
-                          opacity: task.completed_at ? 0.6 : 1,
-                        }}
-                      >
-                        {task.title}
-                      </div>
-                      {task.completed_at && (
-                        <div className="text-xs mt-1" style={{ color: '#10B981' }}>
-                          ✓ Done
+                        <div className="flex items-start gap-3 px-4 py-3">
+                          {/* Completion toggle */}
+                          <button
+                            onClick={() => toggleTask(task)}
+                            disabled={isPending}
+                            aria-label={done ? 'Mark incomplete' : 'Mark complete'}
+                            className="flex-shrink-0 mt-0.5 cursor-pointer disabled:opacity-50 transition-opacity hover:opacity-70"
+                          >
+                            {isPending ? (
+                              <svg
+                                className="animate-spin"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                aria-hidden="true"
+                                style={{ color: 'var(--color-text-muted)' }}
+                              >
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                              </svg>
+                            ) : done ? (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" fill="#10B981" />
+                                <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            ) : (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--color-border)' }} />
+                              </svg>
+                            )}
+                          </button>
+
+                          {/* Task content — click to expand */}
+                          <button
+                            onClick={() => task.description ? toggleExpanded(task.id) : undefined}
+                            className="flex-1 text-left"
+                            style={{ cursor: task.description ? 'pointer' : 'default' }}
+                          >
+                            <div
+                              className="text-xs font-medium uppercase tracking-wider mb-1"
+                              style={{
+                                color: 'var(--color-text-subtle)',
+                                opacity: done ? 0.6 : 1,
+                              }}
+                            >
+                              {channelLabel(task)}
+                            </div>
+                            <div
+                              className="text-sm"
+                              style={{
+                                color: 'var(--color-text)',
+                                textDecoration: done ? 'line-through' : 'none',
+                                opacity: done ? 0.6 : 1,
+                              }}
+                            >
+                              {task.title}
+                            </div>
+                          </button>
+
+                          {/* Expand chevron if description exists */}
+                          {task.description && (
+                            <button
+                              onClick={() => toggleExpanded(task.id)}
+                              aria-label={isExpanded ? 'Collapse details' : 'Show details'}
+                              className="flex-shrink-0 cursor-pointer transition-transform"
+                              style={{
+                                color: 'var(--color-text-muted)',
+                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                              }}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                                <path d="M6 9l6 6 6-6" />
+                              </svg>
+                            </button>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ))}
+
+                        {/* Expanded description */}
+                        {isExpanded && task.description && (
+                          <div
+                            className="px-4 pb-3 pt-0"
+                            style={{ borderTop: '1px solid var(--color-border)' }}
+                          >
+                            <p
+                              className="text-sm leading-relaxed"
+                              style={{ color: 'var(--color-text-muted)' }}
+                            >
+                              {task.description}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -158,38 +274,96 @@ export function DashboardTabs({ businessesWithData, weekDates, defaultTab = 'tod
                 </div>
                 <div className="px-3 py-2.5 flex flex-col gap-2 min-h-32">
                   {tasksByDate[dayInfo.date]?.length > 0 ? (
-                    tasksByDate[dayInfo.date].map((task) => (
-                      <div
-                        key={task.id}
-                        className="text-xs rounded-lg p-2 border"
-                        style={{
-                          borderColor: 'var(--color-border)',
-                          backgroundColor: task.completed_at ? 'rgba(16,185,129,0.06)' : 'var(--color-surface)',
-                        }}
-                      >
+                    tasksByDate[dayInfo.date].map((task) => {
+                      const done = isCompleted(task)
+                      const isPending = pendingTaskId === task.id
+                      const isExpanded = expandedTaskId === task.id
+
+                      return (
                         <div
-                          className="uppercase font-medium mb-0.5"
-                          style={{ color: 'var(--color-text-subtle)', fontSize: '0.65rem' }}
-                        >
-                          {task.channels?.label || task.channels?.type || '—'}
-                        </div>
-                        <div
+                          key={task.id}
+                          className="text-xs rounded-lg border overflow-hidden"
                           style={{
-                            color: 'var(--color-text)',
-                            fontSize: '0.8rem',
-                            textDecoration: task.completed_at ? 'line-through' : 'none',
-                            opacity: task.completed_at ? 0.6 : 1,
+                            borderColor: 'var(--color-border)',
+                            backgroundColor: done ? 'rgba(16,185,129,0.06)' : 'var(--color-surface)',
                           }}
                         >
-                          {task.title}
-                        </div>
-                        {task.completed_at && (
-                          <div style={{ color: '#10B981', fontSize: '0.7rem', marginTop: '0.2rem' }}>
-                            ✓ Done
+                          <div className="flex items-start gap-1.5 p-2">
+                            {/* Completion toggle */}
+                            <button
+                              onClick={() => toggleTask(task)}
+                              disabled={isPending}
+                              aria-label={done ? 'Mark incomplete' : 'Mark complete'}
+                              className="flex-shrink-0 mt-0.5 cursor-pointer disabled:opacity-50"
+                            >
+                              {isPending ? (
+                                <svg
+                                  className="animate-spin"
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  aria-hidden="true"
+                                  style={{ color: 'var(--color-text-muted)' }}
+                                >
+                                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                                </svg>
+                              ) : done ? (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                  <circle cx="12" cy="12" r="9" fill="#10B981" />
+                                  <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              ) : (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--color-border)' }} />
+                                </svg>
+                              )}
+                            </button>
+
+                            {/* Task content */}
+                            <button
+                              onClick={() => task.description ? toggleExpanded(task.id) : undefined}
+                              className="flex-1 text-left min-w-0"
+                              style={{ cursor: task.description ? 'pointer' : 'default' }}
+                            >
+                              <div
+                                className="uppercase font-medium mb-0.5 truncate"
+                                style={{ color: 'var(--color-text-subtle)', fontSize: '0.65rem', opacity: done ? 0.6 : 1 }}
+                              >
+                                {channelLabel(task)}
+                              </div>
+                              <div
+                                style={{
+                                  color: 'var(--color-text)',
+                                  fontSize: '0.8rem',
+                                  textDecoration: done ? 'line-through' : 'none',
+                                  opacity: done ? 0.6 : 1,
+                                }}
+                              >
+                                {task.title}
+                              </div>
+                            </button>
                           </div>
-                        )}
-                      </div>
-                    ))
+
+                          {/* Expanded description */}
+                          {isExpanded && task.description && (
+                            <div
+                              className="px-2 pb-2"
+                              style={{ borderTop: '1px solid var(--color-border)' }}
+                            >
+                              <p
+                                className="text-xs leading-relaxed pt-1.5"
+                                style={{ color: 'var(--color-text-muted)' }}
+                              >
+                                {task.description}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })
                   ) : (
                     <div
                       className="flex items-center justify-center h-full text-xs"

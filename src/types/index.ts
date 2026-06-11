@@ -60,6 +60,7 @@ export interface Profile {
   ai_actions_used: number
   ai_actions_reset_at: string | null
   onboarding_complete: boolean
+  week_start_day: number
   updated_at: string
 }
 

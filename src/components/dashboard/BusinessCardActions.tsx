@@ -8,9 +8,10 @@ interface BusinessCardActionsProps {
   businessId: string
   weekStartDate: string
   hasTasks: boolean
+  onViewWeek?: () => void
 }
 
-export function BusinessCardActions({ businessId, weekStartDate, hasTasks }: BusinessCardActionsProps) {
+export function BusinessCardActions({ businessId, weekStartDate, hasTasks, onViewWeek }: BusinessCardActionsProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,14 +60,14 @@ export function BusinessCardActions({ businessId, weekStartDate, hasTasks }: Bus
             hasTasks ? 'Regenerate plan' : 'Generate plan'
           )}
         </button>
-        {hasTasks && (
-          <a
-            href="/app/dashboard?tab=weekly"
-            className="text-sm font-medium cursor-pointer transition-opacity hover:opacity-70"
+        {hasTasks && onViewWeek && (
+          <button
+            onClick={onViewWeek}
+            className="text-sm font-medium cursor-pointer transition-opacity hover:opacity-70 bg-transparent border-0 p-0"
             style={{ color: 'var(--color-accent)' }}
           >
             View week →
-          </a>
+          </button>
         )}
       </div>
       {!hasTasks && !loading && (

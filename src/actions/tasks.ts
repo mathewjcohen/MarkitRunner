@@ -56,6 +56,26 @@ export async function completeTask(taskId: string) {
 
   if (error) return { error: error.message }
 
+  revalidatePath('/app/dashboard')
+  revalidatePath('/app/today')
+  revalidatePath('/app/weekly')
+  return { success: true }
+}
+
+export async function uncompleteTask(taskId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update({ completed_at: null })
+    .eq('id', taskId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/dashboard')
   revalidatePath('/app/today')
   revalidatePath('/app/weekly')
   return { success: true }

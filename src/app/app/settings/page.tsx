@@ -4,6 +4,7 @@ import { SettingsSignOut } from '@/components/settings/SettingsSignOut'
 import { SettingsPasswordReset } from '@/components/settings/SettingsPasswordReset'
 import { SettingsBillingButton } from '@/components/settings/SettingsBillingButton'
 import { SettingsDeleteAccount } from '@/components/settings/SettingsDeleteAccount'
+import { SettingsWeekStart } from '@/components/settings/SettingsWeekStart'
 import { redirect } from 'next/navigation'
 
 const TIER_LABELS: Record<string, string> = {
@@ -17,8 +18,9 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: userData }, usage] = await Promise.all([
+  const [{ data: userData }, { data: profileData }, usage] = await Promise.all([
     supabase.from('users').select('tier, trial_ends_at, stripe_customer_id, deletion_scheduled_at').eq('id', user.id).single(),
+    supabase.from('profiles').select('week_start_day').eq('id', user.id).single(),
     getUsageWallState(),
   ])
 
@@ -26,6 +28,7 @@ export default async function SettingsPage() {
   const trialEndsAt = userData?.trial_ends_at
   const hasStripeCustomer = !!userData?.stripe_customer_id
   const deletionScheduledAt = userData?.deletion_scheduled_at ?? null
+  const weekStartDay = profileData?.week_start_day ?? 1
 
   const daysLeft = trialEndsAt
     ? Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)
@@ -190,6 +193,24 @@ export default async function SettingsPage() {
                 <SettingsBillingButton />
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Preferences */}
+        <section>
+          <h2
+            className="text-xs font-semibold mb-3 uppercase tracking-widest"
+            style={{ color: 'var(--color-text-subtle)' }}
+          >
+            Preferences
+          </h2>
+          <div
+            className="rounded-2xl border overflow-hidden"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            <div className="px-5 py-4">
+              <SettingsWeekStart currentDay={weekStartDay} />
+            </div>
           </div>
         </section>
 

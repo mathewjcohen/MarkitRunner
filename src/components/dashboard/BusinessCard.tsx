@@ -10,6 +10,7 @@ interface BusinessCardProps {
   daysSinceLastTask: number | null
   nextTaskDate: string | null
   weekStartDate: string
+  onViewWeek?: () => void
 }
 
 export function BusinessCard({
@@ -20,6 +21,7 @@ export function BusinessCard({
   daysSinceLastTask,
   nextTaskDate,
   weekStartDate,
+  onViewWeek,
 }: BusinessCardProps) {
   const consistencyPct = totalThisWeek > 0
     ? Math.round((completedThisWeek / totalThisWeek) * 100)
@@ -72,6 +74,7 @@ export function BusinessCard({
         businessId={business.id}
         weekStartDate={weekStartDate}
         hasTasks={totalThisWeek > 0}
+        onViewWeek={onViewWeek}
       />
     </div>
   )
