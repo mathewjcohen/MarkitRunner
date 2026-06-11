@@ -67,8 +67,8 @@ describe('buildPlanPrompt', () => {
       platform_notes: null,
     }
     const prompt = buildPlanPrompt(mockBusiness, [marketplaceChannel], '2026-06-09')
-    expect(prompt).toContain('transactional sales platform')
-    expect(prompt).toContain('Do NOT suggest community posts')
+    expect(prompt).toContain('PHYSICAL GOODS only')
+    expect(prompt).toContain('Do NOT suggest listing apps')
   })
 
   it('includes channel platform_notes when present', () => {

@@ -10,7 +10,7 @@ export const PLATFORM_CONTEXT: Record<ChannelType, string> = {
   linkedin: 'A professional networking platform. Share thought leadership, industry insights, company updates, and career content.',
   facebook: 'A social networking platform. Post in Groups, on Pages, and in the feed. Events and community groups are effective for engagement.',
   forum: 'A niche topic-specific online forum. Participate in threads, answer questions, share resources. Build reputation before promoting.',
-  marketplace: 'A transactional sales platform (e.g. Reverb, Etsy, eBay). Focused exclusively on product listings, pricing, promotions, and sales copy. Do NOT suggest community posts, discussion threads, Q&A, or engagement tactics unrelated to a product listing.',
+  marketplace: 'A transactional marketplace for PHYSICAL GOODS only (e.g. Reverb for music gear, Etsy for handmade items, eBay for general merchandise). Tasks must involve listing, pricing, photographing, or promoting a physical item for sale. CRITICAL: Do NOT suggest listing apps, software, SaaS tools, subscriptions, or digital services — these cannot be sold on a physical goods marketplace. Do NOT suggest community posts, discussions, or brand awareness tactics.',
   website_blog: 'Your own website or blog. Publish SEO articles, guides, landing pages, or case studies. Fully owned, no algorithm dependency.',
 }
 
