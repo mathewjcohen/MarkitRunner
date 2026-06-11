@@ -6,6 +6,7 @@ export const AI_MODELS = {
   content_prompt: 'claude-haiku-4-5-20251001',
   onboarding: 'claude-haiku-4-5-20251001',
   cold_start: 'claude-haiku-4-5-20251001',
+  task_replacement: 'claude-haiku-4-5-20251001',
 } as const satisfies Record<string, string>
 
 export const AI_LIMITS: Record<'trial' | 'maker' | 'studio', number> = {
