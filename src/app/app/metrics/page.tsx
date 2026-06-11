@@ -23,7 +23,7 @@ function getTrendIndicator(current: number, previous: number | null): { trend: s
   const isNeutral = delta === 0
 
   if (isNeutral) {
-    return { trend: '—', percentage: 0, color: '#736C5E' }
+    return { trend: '—', percentage: 0, color: 'var(--color-text-muted)' }
   }
 
   return {
@@ -54,7 +54,7 @@ function groupMetricsByKey(allMetrics: MetricSnapshot[]): Record<string, MetricS
 }
 
 export default async function MetricsPage() {
-  const businesses = await getBusinesses()
+  const businesses = await getBusinesses(true)
 
   const businessesWithMetrics = await Promise.all(
     businesses.map(async (b) => {
@@ -66,23 +66,23 @@ export default async function MetricsPage() {
   )
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <h1
         className="text-2xl font-semibold mb-8"
-        style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
+        style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text)' }}
       >
         Metrics
       </h1>
 
       {businesses.length === 0 ? (
-        <p style={{ color: '#736C5E' }}>No businesses yet.</p>
+        <p style={{ color: 'var(--color-text-muted)' }}>No businesses yet.</p>
       ) : (
         <div className="flex flex-col gap-10">
           {businessesWithMetrics.map(({ business, metrics, historicalByKey }) => (
             <div key={business.id}>
               <h2
                 className="text-base font-semibold mb-4"
-                style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
+                style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text)' }}
               >
                 {business.name}
               </h2>
@@ -107,7 +107,7 @@ export default async function MetricsPage() {
                       <div
                         key={m.metric_key}
                         className="rounded-2xl p-4 border"
-                        style={{ backgroundColor: '#FFFFFF', borderColor: '#E8E4DC' }}
+                        style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-1.5">
@@ -115,7 +115,7 @@ export default async function MetricsPage() {
                               className="inline-block w-2 h-2 rounded-full"
                               style={{ backgroundColor: CATEGORY_COLORS[m.metric_category] ?? '#736C5E' }}
                             />
-                            <span className="text-xs" style={{ color: '#736C5E' }}>
+                            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                               {m.metric_label}
                             </span>
                           </div>
@@ -130,7 +130,7 @@ export default async function MetricsPage() {
                         </div>
                         <p
                           className="text-2xl font-semibold"
-                          style={{ fontFamily: 'var(--font-display)', color: '#18160F' }}
+                          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text)' }}
                         >
                           {m.value.toLocaleString()}
                         </p>
@@ -144,9 +144,9 @@ export default async function MetricsPage() {
               {/* Log form */}
               <div
                 className="rounded-2xl p-5 border"
-                style={{ backgroundColor: '#FFFFFF', borderColor: '#E8E4DC' }}
+                style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
               >
-                <p className="text-sm font-medium mb-4" style={{ color: '#18160F' }}>
+                <p className="text-sm font-medium mb-4" style={{ color: 'var(--color-text)' }}>
                   Log a metric
                 </p>
                 <MetricLogForm businessId={business.id} />

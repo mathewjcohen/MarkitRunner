@@ -16,6 +16,7 @@ export function BusinessCardMenu({ businessId, businessName, isActive, archivedA
   const [open, setOpen] = useState(false)
   const [archiveConfirm, setArchiveConfirm] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -31,21 +32,29 @@ export function BusinessCardMenu({ businessId, businessName, isActive, archivedA
 
   async function handlePauseResume() {
     setLoading('pauseresume')
-    if (isActive) {
-      await pauseBusiness(businessId)
-    } else {
-      await resumeBusiness(businessId)
+    setActionError(null)
+    const result = isActive ? await pauseBusiness(businessId) : await resumeBusiness(businessId)
+    if (result?.error) {
+      setActionError(result.error)
+      setLoading(null)
+      return
     }
     setOpen(false)
-    router.refresh()
+    router.push('/app/dashboard')
     setLoading(null)
   }
 
   async function handleArchive() {
     setLoading('archive')
-    await archiveBusiness(businessId)
+    setActionError(null)
+    const result = await archiveBusiness(businessId)
+    if (result?.error) {
+      setActionError(result.error)
+      setLoading(null)
+      return
+    }
     setOpen(false)
-    router.refresh()
+    router.push('/app/dashboard')
     setLoading(null)
   }
 
@@ -66,6 +75,13 @@ export function BusinessCardMenu({ businessId, businessName, isActive, archivedA
           <circle cx="12" cy="19" r="1.5" />
         </svg>
       </button>
+
+      {actionError && !open && (
+        <p className="absolute right-0 top-9 text-xs rounded-lg px-2 py-1 whitespace-nowrap z-20"
+          style={{ backgroundColor: '#FEE2E2', color: '#991B1B' }}>
+          {actionError}
+        </p>
+      )}
 
       {open && (
         <div

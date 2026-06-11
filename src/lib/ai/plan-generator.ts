@@ -44,9 +44,11 @@ Respond with ONLY valid JSON matching this schema:
 }
 
 export function validatePlanOutput(raw: string): WeeklyPlanOutput {
+  // Claude sometimes wraps JSON in markdown code fences — strip them before parsing
+  const cleaned = raw.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
   let parsed: unknown
   try {
-    parsed = JSON.parse(raw)
+    parsed = JSON.parse(cleaned)
   } catch {
     throw new Error('Plan response is not valid JSON')
   }
