@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { completeTask, deferTask } from '@/actions/tasks'
+import { completeTask, deferTask, replaceTask } from '@/actions/tasks'
 
 interface TodayTaskProps {
   task: {
@@ -33,7 +33,10 @@ function getChannelIcon(channelType: string): string {
 export function TodayTask({ task }: TodayTaskProps) {
   const [completing, setCompleting] = useState(false)
   const [confirmingDefer, setConfirmingDefer] = useState(false)
+  const [confirmingReplace, setConfirmingReplace] = useState(false)
+  const [replacing, setReplacing] = useState(false)
   const deferTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const replaceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const channelDisplay = task.channels
     ? task.channels.label
@@ -67,9 +70,22 @@ export function TodayTask({ task }: TodayTaskProps) {
     }
   }
 
+  async function handleReplaceClick() {
+    if (confirmingReplace) {
+      if (replaceTimeoutRef.current) clearTimeout(replaceTimeoutRef.current)
+      setConfirmingReplace(false)
+      setReplacing(true)
+      await replaceTask(task.id)
+    } else {
+      setConfirmingReplace(true)
+      replaceTimeoutRef.current = setTimeout(() => setConfirmingReplace(false), 3000)
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (deferTimeoutRef.current) clearTimeout(deferTimeoutRef.current)
+      if (replaceTimeoutRef.current) clearTimeout(replaceTimeoutRef.current)
     }
   }, [])
 
@@ -77,9 +93,9 @@ export function TodayTask({ task }: TodayTaskProps) {
     <div
       className="rounded-2xl p-6 border transition-all duration-600 relative"
       style={{
-        backgroundColor: completing ? '#22C55E' : '#FFFFFF',
-        borderColor: completing ? '#22C55E' : '#E8E4DC',
-        opacity: completing ? 0.9 : 1,
+        backgroundColor: completing ? '#22C55E' : replacing ? '#4B5563' : '#FFFFFF',
+        borderColor: completing ? '#22C55E' : replacing ? '#4B5563' : '#E8E4DC',
+        opacity: completing ? 0.9 : replacing ? 0.9 : 1,
       }}
     >
       {completing && (
@@ -88,7 +104,13 @@ export function TodayTask({ task }: TodayTaskProps) {
         </div>
       )}
 
-      <div style={{ opacity: completing ? 0 : 1, transition: 'opacity 200ms ease-out' }}>
+      {replacing && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none rounded-2xl">
+          <div className="text-sm font-medium text-white">Finding a better task...</div>
+        </div>
+      )}
+
+      <div style={{ opacity: completing || replacing ? 0 : 1, transition: 'opacity 200ms ease-out' }}>
         {/* Business + Channel context */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {task.businesses && (
@@ -154,7 +176,7 @@ export function TodayTask({ task }: TodayTaskProps) {
         <div className="flex gap-3">
           <button
             onClick={handleComplete}
-            disabled={completing || confirmingDefer}
+            disabled={completing || confirmingDefer || replacing}
             className="flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all cursor-pointer disabled:opacity-60"
             style={{
               backgroundColor: '#B8601F',
@@ -165,7 +187,7 @@ export function TodayTask({ task }: TodayTaskProps) {
           </button>
           <button
             onClick={handleDeferClick}
-            disabled={completing}
+            disabled={completing || replacing}
             className="py-3 px-4 rounded-xl text-sm font-medium transition-all cursor-pointer disabled:opacity-60"
             style={{
               backgroundColor: confirmingDefer ? '#B8601F' : '#F7F5F1',
@@ -176,6 +198,23 @@ export function TodayTask({ task }: TodayTaskProps) {
             {confirmingDefer ? 'Confirm defer →' : 'Tomorrow'}
           </button>
         </div>
+
+        {/* Tertiary: replace */}
+        {!completing && !replacing && (
+          <button
+            onClick={handleReplaceClick}
+            disabled={completing || replacing}
+            className="w-full text-center text-xs cursor-pointer disabled:opacity-40 transition-colors mt-1"
+            style={{
+              color: confirmingReplace ? '#B8601F' : '#C4BFB8',
+              background: 'none',
+              border: 'none',
+              padding: '4px 0',
+            }}
+          >
+            {confirmingReplace ? 'Confirm — replace this task' : "Can't do this? Replace it"}
+          </button>
+        )}
       </div>
     </div>
   )
