@@ -35,6 +35,10 @@
   animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+html {
+  font-size: 110%;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);
