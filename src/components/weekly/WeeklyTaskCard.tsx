@@ -78,7 +78,7 @@ export function WeeklyTaskCard({ task }: WeeklyTaskCardProps) {
           className="text-left cursor-pointer mt-0.5"
           style={{
             fontSize: '0.7rem',
-            color: confirmingReplace ? '#B8601F' : '#C4BFB8',
+            color: confirmingReplace ? '#B8601F' : '#8B8177',
             background: 'none',
             border: 'none',
             padding: 0,

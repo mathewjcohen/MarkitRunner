@@ -206,7 +206,7 @@ export function TodayTask({ task }: TodayTaskProps) {
             disabled={completing || replacing}
             className="w-full text-center text-xs cursor-pointer disabled:opacity-40 transition-colors mt-1"
             style={{
-              color: confirmingReplace ? '#B8601F' : '#C4BFB8',
+              color: confirmingReplace ? '#B8601F' : '#8B8177',
               background: 'none',
               border: 'none',
               padding: '4px 0',
