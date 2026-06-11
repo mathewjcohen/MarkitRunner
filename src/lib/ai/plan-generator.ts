@@ -1,5 +1,19 @@
 import type { Business, Channel, ChannelType, WeeklyPlanOutput } from '@/types'
 
+export const PLATFORM_CONTEXT: Record<ChannelType, string> = {
+  discord: 'Community-focused chat platform; suited for discussion, updates, and community engagement',
+  instagram: 'Visual social media platform; focus on high-quality images and short video reels',
+  youtube: 'Long-form video platform; requires substantial production effort for quality content',
+  email_newsletter: 'Direct email communication; best for updates, curated insights, and building relationships',
+  reddit: 'Discussion forum; community-driven conversations and niche communities',
+  tiktok: 'Short-form vertical video; fast-paced, trend-driven, requires consistent posting',
+  linkedin: 'Professional network; B2B focused, thought leadership and industry insights',
+  facebook: 'Broad social platform; groups, events, and community discussions',
+  forum: 'Niche discussion platform; deep conversations and community knowledge building',
+  marketplace: 'Transactional sales platform; focus on product listings, sales, and commerce',
+  website_blog: 'Owned content platform; SEO-friendly long-form articles and guides',
+}
+
 export function buildPlanPrompt(
   business: Business,
   channels: Channel[],
