@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getUsageWallState } from '@/actions/usage'
+import { getBusinesses } from '@/actions/businesses'
 import { SettingsSignOut } from '@/components/settings/SettingsSignOut'
 import { SettingsPasswordReset } from '@/components/settings/SettingsPasswordReset'
 import { SettingsBillingButton } from '@/components/settings/SettingsBillingButton'
@@ -19,13 +20,14 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: userData }, { data: profileData }, usage, { data: channelsData }] = await Promise.all([
+  const [{ data: userData }, { data: profileData }, usage, businesses, { data: channelsData }] = await Promise.all([
     supabase.from('users').select('tier, trial_ends_at, stripe_customer_id, deletion_scheduled_at').eq('id', user.id).single(),
     supabase.from('profiles').select('week_start_day').eq('id', user.id).single(),
     getUsageWallState(),
+    getBusinesses(),
     supabase
       .from('channels')
-      .select('id, type, label, platform_notes, businesses(name)')
+      .select('id, type, label, platform_notes, cadence, business_id')
       .eq('user_id', user.id)
       .eq('is_active', true)
       .order('created_at'),
@@ -37,16 +39,20 @@ export default async function SettingsPage() {
   const deletionScheduledAt = userData?.deletion_scheduled_at ?? null
   const weekStartDay = profileData?.week_start_day ?? 1
 
-  const channels = (channelsData ?? []).map((c) => {
-    const business = Array.isArray(c.businesses) ? c.businesses[0] : c.businesses
-    return {
-      id: c.id,
-      type: c.type,
-      label: (c.label as string | null) ?? null,
-      platform_notes: (c.platform_notes as string | null) ?? null,
-      businessName: (business as { name: string } | null)?.name ?? '',
-    }
-  })
+  const channels = (channelsData ?? []).map((c) => ({
+    id: c.id,
+    type: c.type,
+    label: (c.label as string | null) ?? null,
+    platform_notes: (c.platform_notes as string | null) ?? null,
+    cadence: c.cadence as string,
+    businessId: c.business_id,
+  }))
+
+  const ventures = businesses.map((b) => ({
+    id: b.id,
+    name: b.name,
+    channels: channels.filter((c) => c.businessId === b.id),
+  }))
 
   const daysLeft = trialEndsAt
     ? Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)
@@ -247,7 +253,7 @@ export default async function SettingsPage() {
             className="rounded-2xl border overflow-hidden"
             style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
-            <SettingsChannels channels={channels} />
+            <SettingsChannels ventures={ventures} />
           </div>
         </section>
 
