@@ -9,7 +9,7 @@ import type { ChannelType, Cadence } from '@/types'
 
 interface ChannelRow {
   id: string
-  type: string
+  type: ChannelType
   label: string | null
   platform_notes: string | null
   cadence: string
@@ -282,7 +282,6 @@ export function SettingsChannels({ ventures }: Props) {
                           formState.selectedType === t ? 'var(--color-accent)' : 'var(--color-border)',
                         color:
                           formState.selectedType === t ? '#fff' : 'var(--color-text-muted)',
-                        cursor: 'pointer',
                       }}
                     >
                       {formatChannelType(t)}
@@ -304,7 +303,7 @@ export function SettingsChannels({ ventures }: Props) {
                         },
                       }))
                     }
-                    className="flex-1 text-sm rounded-lg px-3 py-2 border cursor-pointer"
+                    className="flex-1 text-sm rounded-lg px-3 py-2 border"
                     style={{
                       backgroundColor: 'var(--color-surface-raised)',
                       borderColor: 'var(--color-border)',
@@ -329,7 +328,6 @@ export function SettingsChannels({ ventures }: Props) {
                       borderColor: 'var(--color-border)',
                       color: 'var(--color-text)',
                       outline: 'none',
-                      cursor: 'pointer',
                     }}
                   >
                     {CADENCE_OPTIONS.map((opt) => (
