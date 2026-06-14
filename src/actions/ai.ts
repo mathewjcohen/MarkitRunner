@@ -18,15 +18,26 @@ export async function generateWeeklyPlan(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const [{ data: business }, { data: channels }] = await Promise.all([
+  const threeWeeksAgo = new Date(weekStartDate)
+  threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21)
+  const threeWeeksAgoStr = threeWeeksAgo.toISOString().split('T')[0]
+
+  const [{ data: business }, { data: channels }, { data: recentTasks }] = await Promise.all([
     supabase.from('businesses').select('*').eq('id', businessId).eq('user_id', user.id).single(),
     supabase.from('channels').select('*').eq('business_id', businessId).eq('is_active', true),
+    supabase
+      .from('tasks')
+      .select('title, description, scheduled_date')
+      .eq('business_id', businessId)
+      .gte('scheduled_date', threeWeeksAgoStr)
+      .lt('scheduled_date', weekStartDate)
+      .order('scheduled_date', { ascending: false }),
   ])
 
   if (!business) return { error: 'Business not found' }
   if (!channels?.length) return { error: 'No active channels found for this business' }
 
-  const prompt = buildPlanPrompt(business, channels, weekStartDate)
+  const prompt = buildPlanPrompt(business, channels, weekStartDate, recentTasks ?? [])
 
   const message = await anthropic.messages.create({
     model: AI_MODELS.weekly_plan,

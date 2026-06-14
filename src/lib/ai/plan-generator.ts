@@ -14,10 +14,17 @@ export const PLATFORM_CONTEXT: Record<ChannelType, string> = {
   website_blog: 'Your own website or blog. Publish SEO articles, guides, landing pages, or case studies. Fully owned, no algorithm dependency.',
 }
 
+interface RecentTask {
+  title: string
+  description: string | null
+  scheduled_date: string
+}
+
 export function buildPlanPrompt(
   business: Business,
   channels: Channel[],
-  weekStart: string
+  weekStart: string,
+  recentTasks: RecentTask[] = []
 ): string {
   const channelList = channels
     .map((c) => {
@@ -27,6 +34,10 @@ export function buildPlanPrompt(
       return `- ${label} — ${c.cadence}\n  Platform: ${context}${notes}`
     })
     .join('\n')
+
+  const historySection = recentTasks.length > 0
+    ? `\nRecent tasks already done (DO NOT repeat these titles or the same angle — vary the content, format, or topic):\n${recentTasks.map((t) => `- [${t.scheduled_date}] ${t.title}`).join('\n')}\n`
+    : ''
 
   return `You are a marketing coach helping an indie founder stay consistent.
 
@@ -39,7 +50,7 @@ ${business.cold_start_notes ? `Notes: ${business.cold_start_notes}` : ''}
 
 Active channels:
 ${channelList}
-
+${historySection}
 Generate a weekly marketing plan for the week starting ${weekStart}.
 
 Rules:
@@ -48,6 +59,7 @@ Rules:
 - Tasks MUST be feasible on the described platform — respect the Platform constraints for each channel
 - scheduled_date must be YYYY-MM-DD format, within the week starting ${weekStart}
 - Tasks should align with the primary goal: ${business.primary_goal.replace(/_/g, ' ')}
+- Do NOT repeat or closely paraphrase any task from the recent history above
 
 Respond with ONLY valid JSON matching this schema:
 {
