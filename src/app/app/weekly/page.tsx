@@ -1,8 +1,10 @@
+import { createClient } from '@/lib/supabase/server'
 import { getTasksForWeek } from '@/actions/tasks'
 import { getBusinesses } from '@/actions/businesses'
 import { GeneratePlanButton } from '@/components/weekly/GeneratePlanButton'
 import { WeeklyTaskCard } from '@/components/weekly/WeeklyTaskCard'
 import { buildWeekRange, getWeekDates, formatDateRange, isToday } from '@/lib/utils/date'
+import { redirect } from 'next/navigation'
 import type { Task, Business } from '@/types'
 
 interface TaskWithRelations extends Task {
@@ -11,14 +13,26 @@ interface TaskWithRelations extends Task {
 }
 
 export default async function WeeklyPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('week_start_day')
+    .eq('id', user.id)
+    .single()
+
+  const weekStartDay = profile?.week_start_day ?? 1
+
   const today = new Date().toISOString().split('T')[0]
 
   const [tasks, businesses] = await Promise.all([
-    getTasksForWeek(today),
+    getTasksForWeek(today, weekStartDay),
     getBusinesses(),
   ])
 
-  const weekRange = buildWeekRange(today)
+  const weekRange = buildWeekRange(today, weekStartDay)
   const weekDates = getWeekDates(weekRange.start)
   const dateRangeText = formatDateRange(weekRange.start)
 

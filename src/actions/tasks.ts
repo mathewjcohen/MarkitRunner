@@ -8,12 +8,12 @@ import { buildReplacementPrompt, parseReplacementTask } from '@/lib/ai/task-repl
 import type { Business, Channel } from '@/types'
 
 
-export async function getTasksForWeek(weekStart: string) {
+export async function getTasksForWeek(weekStart: string, weekStartDay = 1) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { start, end } = buildWeekRange(weekStart)
+  const { start, end } = buildWeekRange(weekStart, weekStartDay)
 
   const { data } = await supabase
     .from('tasks')

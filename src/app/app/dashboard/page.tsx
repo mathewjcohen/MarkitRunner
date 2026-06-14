@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const activeBusinesses = allBusinesses.filter((b) => !b.archived_at)
   const archivedBusinesses = allBusinesses.filter((b) => b.archived_at !== null)
 
-  const allWeekTasks = await getTasksForWeek(today)
+  const allWeekTasks = await getTasksForWeek(today, weekStartDay)
 
   const now = Date.now()
   const businessesWithData = await Promise.all(
