@@ -1,11 +1,11 @@
 'use client'
 
 import { signIn } from '@/actions/auth'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams()
   const confirmError = searchParams.get('error') === 'confirmation_failed'
   const [error, setError] = useState<string | null>(
@@ -18,32 +18,40 @@ export default function LoginPage() {
   }
 
   return (
+    <form action={handleSubmit} className="flex flex-col gap-4">
+      <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        required
+        className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+      />
+      <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        required
+        className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+      />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+      <button
+        type="submit"
+        className="bg-black text-white rounded-lg px-4 py-2 text-sm font-medium cursor-pointer hover:bg-gray-800 transition-colors"
+      >
+        Log in
+      </button>
+    </form>
+  )
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-sm p-8 bg-white rounded-xl shadow-sm">
         <h1 className="text-2xl font-semibold mb-6">Log in</h1>
-        <form action={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            required
-            className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-            className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-          />
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          <button
-            type="submit"
-            className="bg-black text-white rounded-lg px-4 py-2 text-sm font-medium cursor-pointer hover:bg-gray-800 transition-colors"
-          >
-            Log in
-          </button>
-        </form>
+        <Suspense>
+          <LoginForm />
+        </Suspense>
         <p className="text-xs text-gray-400 mt-4 text-center">
           No account? <Link href="/signup" className="underline">Start free trial</Link>
         </p>
