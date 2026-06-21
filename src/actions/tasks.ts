@@ -138,6 +138,14 @@ export async function replaceTask(taskId: string) {
 
   if (markError) return { error: markError.message }
 
+  // Persist rejection permanently before generating a replacement
+  await supabase.from('rejected_ideas').insert({
+    business_id: task.business_id,
+    channel_id: task.channel_id,
+    user_id: user.id,
+    title: task.title,
+  })
+
   // If the channel was removed, mark as replaced but don't generate a new task for it
   const channel = task.channels as Channel | null
   if (!channel || !channel.is_active) {
@@ -147,11 +155,20 @@ export async function replaceTask(taskId: string) {
     return { success: true }
   }
 
+  // Fetch all rejections for this channel to pass to the replacement prompt
+  const { data: channelRejections } = await supabase
+    .from('rejected_ideas')
+    .select('title')
+    .eq('business_id', task.business_id)
+    .eq('channel_id', task.channel_id)
+    .order('rejected_at', { ascending: false })
+
   const prompt = buildReplacementPrompt(
     task.scheduled_date,
     task.businesses as Business,
     task.channels as Channel,
-    task.title
+    task.title,
+    channelRejections ?? []
   )
 
   const message = await anthropic.messages.create({
