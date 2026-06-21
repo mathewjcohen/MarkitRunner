@@ -50,6 +50,24 @@ describe('buildReplacementPrompt', () => {
     const prompt = buildReplacementPrompt('2026-06-11', mockBusiness, mockMarketplaceChannel, 'Any task')
     expect(prompt).toContain('2026-06-11')
   })
+
+  it('includes previous rejections section when provided', () => {
+    const previous = [{ title: 'Post a product walkthrough' }, { title: 'Share a customer testimonial' }]
+    const prompt = buildReplacementPrompt('2026-06-11', mockBusiness, mockMarketplaceChannel, 'Any task', previous)
+    expect(prompt).toContain('Previously rejected ideas')
+    expect(prompt).toContain('Post a product walkthrough')
+    expect(prompt).toContain('Share a customer testimonial')
+  })
+
+  it('omits previous rejections section when array is empty', () => {
+    const prompt = buildReplacementPrompt('2026-06-11', mockBusiness, mockMarketplaceChannel, 'Any task', [])
+    expect(prompt).not.toContain('Previously rejected ideas')
+  })
+
+  it('omits previous rejections section when not provided', () => {
+    const prompt = buildReplacementPrompt('2026-06-11', mockBusiness, mockMarketplaceChannel, 'Any task')
+    expect(prompt).not.toContain('Previously rejected ideas')
+  })
 })
 
 describe('parseReplacementTask', () => {
