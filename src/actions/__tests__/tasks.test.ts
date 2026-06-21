@@ -282,6 +282,8 @@ describe('replaceTask', () => {
     await replaceTask(mockTaskId)
 
     expect(selectMock).toHaveBeenCalledWith('title')
+    expect(mockRejectionSelectChain.eq).toHaveBeenCalledWith('business_id', mockBusinessId)
+    expect(mockRejectionSecondEqChain.eq).toHaveBeenCalledWith('channel_id', mockChannelId)
   })
 
   it('passes rejection history as 5th argument to buildReplacementPrompt', async () => {
