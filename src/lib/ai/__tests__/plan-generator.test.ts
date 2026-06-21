@@ -79,6 +79,40 @@ describe('buildPlanPrompt', () => {
     const prompt = buildPlanPrompt(mockBusiness, [channelWithNotes], '2026-06-09')
     expect(prompt).toContain('Reverb.com — music gear sales only')
   })
+
+  it('includes rejected ideas section when rejections are provided', () => {
+    const rejections = [{ title: 'Post a giveaway contest' }, { title: 'Write a comparison post' }]
+    const prompt = buildPlanPrompt(mockBusiness, [mockLinkedinChannel], '2026-06-09', [], rejections)
+    expect(prompt).toContain('Permanently rejected ideas')
+    expect(prompt).toContain('Post a giveaway contest')
+    expect(prompt).toContain('Write a comparison post')
+  })
+
+  it('omits rejected ideas section when rejections array is empty', () => {
+    const prompt = buildPlanPrompt(mockBusiness, [mockLinkedinChannel], '2026-06-09', [], [])
+    expect(prompt).not.toContain('Permanently rejected ideas')
+  })
+
+  it('omits recent tasks section when recentTasks array is empty', () => {
+    const prompt = buildPlanPrompt(mockBusiness, [mockLinkedinChannel], '2026-06-09', [], [])
+    expect(prompt).not.toContain('Recent tasks')
+  })
+
+  it('includes both history sections when both are provided', () => {
+    const tasks = [{ title: 'Tutorial on pricing', description: null, scheduled_date: '2026-06-07' }]
+    const rejections = [{ title: 'Post a giveaway' }]
+    const prompt = buildPlanPrompt(mockBusiness, [mockLinkedinChannel], '2026-06-09', tasks, rejections)
+    expect(prompt).toContain('Recent tasks')
+    expect(prompt).toContain('Tutorial on pricing')
+    expect(prompt).toContain('Permanently rejected ideas')
+    expect(prompt).toContain('Post a giveaway')
+  })
+
+  it('includes format rotation rule', () => {
+    const prompt = buildPlanPrompt(mockBusiness, [mockLinkedinChannel], '2026-06-09')
+    expect(prompt).toContain('tutorial')
+    expect(prompt).toContain('behind-the-scenes')
+  })
 })
 
 describe('validatePlanOutput', () => {

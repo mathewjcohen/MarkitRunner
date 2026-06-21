@@ -24,7 +24,8 @@ export function buildPlanPrompt(
   business: Business,
   channels: Channel[],
   weekStart: string,
-  recentTasks: RecentTask[] = []
+  recentTasks: RecentTask[] = [],
+  rejectedIdeas: { title: string }[] = []
 ): string {
   const channelList = channels
     .map((c) => {
@@ -36,7 +37,11 @@ export function buildPlanPrompt(
     .join('\n')
 
   const historySection = recentTasks.length > 0
-    ? `\nRecent tasks already done (DO NOT repeat these titles or the same angle — vary the content, format, or topic):\n${recentTasks.map((t) => `- [${t.scheduled_date}] ${t.title}`).join('\n')}\n`
+    ? `\nRecent tasks (context only — vary the angle, format, and topic away from these):\n${recentTasks.map((t) => `- [${t.scheduled_date}] ${t.title}`).join('\n')}\n`
+    : ''
+
+  const rejectedSection = rejectedIdeas.length > 0
+    ? `\nPermanently rejected ideas (NEVER suggest these or anything conceptually similar — avoid the same spirit, not just the same words):\n${rejectedIdeas.map((r) => `- ${r.title}`).join('\n')}\n`
     : ''
 
   return `You are a marketing coach helping an indie founder stay consistent.
@@ -50,7 +55,7 @@ ${business.cold_start_notes ? `Notes: ${business.cold_start_notes}` : ''}
 
 Active channels:
 ${channelList}
-${historySection}
+${historySection}${rejectedSection}
 Generate a weekly marketing plan for the week starting ${weekStart}.
 
 Rules:
@@ -60,6 +65,9 @@ Rules:
 - scheduled_date must be YYYY-MM-DD format, within the week starting ${weekStart}
 - Tasks should align with the primary goal: ${business.primary_goal.replace(/_/g, ' ')}
 - Do NOT repeat or closely paraphrase any task from the recent history above
+- Vary the content format week to week — rotate through formats such as: tutorial, Q&A, behind-the-scenes, case study, announcement, poll, opinion piece, story, resource list, community challenge
+- Do NOT suggest anything from the rejected list, or any idea that follows the same angle or spirit as a rejected idea
+- Within this plan, every task must have a distinct angle — no two tasks should feel like variations of the same idea, even across different channels
 
 Respond with ONLY valid JSON matching this schema:
 {
