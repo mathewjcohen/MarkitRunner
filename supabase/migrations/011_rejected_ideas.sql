@@ -22,3 +22,7 @@ create policy "Users can insert their own rejected ideas"
 create policy "Users can delete their own rejected ideas"
   on public.rejected_ideas for delete
   using (auth.uid() = user_id);
+
+create policy "Users can update their own rejected ideas"
+  on public.rejected_ideas for update
+  using (auth.uid() = user_id);

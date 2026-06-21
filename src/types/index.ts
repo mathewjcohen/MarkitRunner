@@ -41,6 +41,7 @@ export type AIActionType =
   | 'content_prompt'
   | 'onboarding'
   | 'cold_start'
+  | 'task_replacement'
 
 export interface User {
   id: string
