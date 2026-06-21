@@ -110,6 +110,15 @@ export interface Task {
   created_at: string
 }
 
+export interface RejectedIdea {
+  id: string
+  business_id: string
+  channel_id: string
+  user_id: string
+  title: string
+  rejected_at: string
+}
+
 export interface GeneratedPlan {
   id: string
   business_id: string
