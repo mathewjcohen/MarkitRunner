@@ -18,26 +18,33 @@ export async function generateWeeklyPlan(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const threeWeeksAgo = new Date(weekStartDate)
-  threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21)
-  const threeWeeksAgoStr = threeWeeksAgo.toISOString().split('T')[0]
+  const eightWeeksAgo = new Date(weekStartDate)
+  eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56)
+  const eightWeeksAgoStr = eightWeeksAgo.toISOString().split('T')[0]
 
-  const [{ data: business }, { data: channels }, { data: recentTasks }] = await Promise.all([
-    supabase.from('businesses').select('*').eq('id', businessId).eq('user_id', user.id).single(),
-    supabase.from('channels').select('*').eq('business_id', businessId).eq('is_active', true),
-    supabase
-      .from('tasks')
-      .select('title, description, scheduled_date')
-      .eq('business_id', businessId)
-      .gte('scheduled_date', threeWeeksAgoStr)
-      .lt('scheduled_date', weekStartDate)
-      .order('scheduled_date', { ascending: false }),
-  ])
+  const [{ data: business }, { data: channels }, { data: recentTasks }, { data: rejectedIdeas }] =
+    await Promise.all([
+      supabase.from('businesses').select('*').eq('id', businessId).eq('user_id', user.id).single(),
+      supabase.from('channels').select('*').eq('business_id', businessId).eq('is_active', true),
+      supabase
+        .from('tasks')
+        .select('title, description, scheduled_date')
+        .eq('business_id', businessId)
+        .gte('scheduled_date', eightWeeksAgoStr)
+        .lt('scheduled_date', weekStartDate)
+        .order('scheduled_date', { ascending: false }),
+      supabase
+        .from('rejected_ideas')
+        .select('title')
+        .eq('business_id', businessId)
+        .eq('user_id', user.id)
+        .order('rejected_at', { ascending: false }),
+    ])
 
   if (!business) return { error: 'Business not found' }
   if (!channels?.length) return { error: 'No active channels found for this business' }
 
-  const prompt = buildPlanPrompt(business, channels, weekStartDate, recentTasks ?? [])
+  const prompt = buildPlanPrompt(business, channels, weekStartDate, recentTasks ?? [], rejectedIdeas ?? [])
 
   const message = await anthropic.messages.create({
     model: AI_MODELS.weekly_plan,
@@ -58,7 +65,6 @@ export async function generateWeeklyPlan(
   const tokensUsed = message.usage.input_tokens + message.usage.output_tokens
   await trackUsage('weekly_plan', tokensUsed)
 
-  // Persist plan record
   const { data: planRecord } = await supabase
     .from('generated_plans')
     .insert({
@@ -71,7 +77,6 @@ export async function generateWeeklyPlan(
     .select()
     .single()
 
-  // Insert tasks from plan
   const taskInserts = plan.tasks.map((t) => ({
     business_id: businessId,
     user_id: user.id,
