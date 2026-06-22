@@ -83,7 +83,7 @@ Respond with ONLY valid JSON matching this schema:
 }`
 }
 
-export function validatePlanOutput(raw: string): WeeklyPlanOutput {
+export function validatePlanOutput(raw: string, weekStart: string): WeeklyPlanOutput {
   // Claude sometimes wraps JSON in markdown code fences — strip them before parsing
   const cleaned = raw.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
   let parsed: unknown
@@ -104,12 +104,19 @@ export function validatePlanOutput(raw: string): WeeklyPlanOutput {
 
   const output = parsed as WeeklyPlanOutput
 
+  const [wy, wm, wd] = weekStart.split('-').map(Number)
+  const weekEndDate = new Date(wy, wm - 1, wd + 6)
+  const weekEnd = `${weekEndDate.getFullYear()}-${String(weekEndDate.getMonth() + 1).padStart(2, '0')}-${String(weekEndDate.getDate()).padStart(2, '0')}`
+
   for (const task of output.tasks) {
     if (!task.title || !task.description || !task.channel_type || !task.scheduled_date) {
       throw new Error(`Task missing required fields: ${JSON.stringify(task)}`)
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(task.scheduled_date)) {
       throw new Error(`Invalid date format: ${task.scheduled_date}`)
+    }
+    if (task.scheduled_date < weekStart || task.scheduled_date > weekEnd) {
+      throw new Error(`Task date ${task.scheduled_date} is outside week ${weekStart}–${weekEnd}`)
     }
   }
 

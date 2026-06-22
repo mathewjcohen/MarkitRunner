@@ -116,6 +116,8 @@ describe('buildPlanPrompt', () => {
 })
 
 describe('validatePlanOutput', () => {
+  const weekStart = '2026-06-09'
+
   const validPlan = JSON.stringify({
     tasks: [
       {
@@ -129,17 +131,17 @@ describe('validatePlanOutput', () => {
   })
 
   it('parses valid plan output', () => {
-    const result = validatePlanOutput(validPlan)
+    const result = validatePlanOutput(validPlan, weekStart)
     expect(result.tasks).toHaveLength(1)
     expect(result.summary).toBe('Focus on audience growth through LinkedIn this week')
   })
 
   it('throws on invalid JSON', () => {
-    expect(() => validatePlanOutput('not json')).toThrow('not valid JSON')
+    expect(() => validatePlanOutput('not json', weekStart)).toThrow('not valid JSON')
   })
 
   it('throws when tasks array is missing', () => {
-    expect(() => validatePlanOutput(JSON.stringify({ summary: 'ok' }))).toThrow()
+    expect(() => validatePlanOutput(JSON.stringify({ summary: 'ok' }), weekStart)).toThrow()
   })
 
   it('throws on invalid date format', () => {
@@ -147,6 +149,37 @@ describe('validatePlanOutput', () => {
       tasks: [{ title: 'T', description: 'D', channel_type: 'linkedin', scheduled_date: '06/09/2026' }],
       summary: 'ok',
     })
-    expect(() => validatePlanOutput(bad)).toThrow('Invalid date format')
+    expect(() => validatePlanOutput(bad, weekStart)).toThrow('Invalid date format')
+  })
+
+  it('throws when task date is before week start', () => {
+    const bad = JSON.stringify({
+      tasks: [{ title: 'T', description: 'D', channel_type: 'linkedin', scheduled_date: '2026-06-08' }],
+      summary: 'ok',
+    })
+    expect(() => validatePlanOutput(bad, weekStart)).toThrow('outside week')
+  })
+
+  it('throws when task date is after week end', () => {
+    const bad = JSON.stringify({
+      tasks: [{ title: 'T', description: 'D', channel_type: 'linkedin', scheduled_date: '2026-06-16' }],
+      summary: 'ok',
+    })
+    expect(() => validatePlanOutput(bad, weekStart)).toThrow('outside week')
+  })
+
+  it('accepts task dates on the last day of the week', () => {
+    const plan = JSON.stringify({
+      tasks: [{ title: 'T', description: 'D', channel_type: 'linkedin', scheduled_date: '2026-06-15' }],
+      summary: 'ok',
+    })
+    const result = validatePlanOutput(plan, weekStart)
+    expect(result.tasks[0].scheduled_date).toBe('2026-06-15')
+  })
+
+  it('strips markdown code fences before parsing', () => {
+    const fenced = '```json\n' + validPlan + '\n```'
+    const result = validatePlanOutput(fenced, weekStart)
+    expect(result.tasks).toHaveLength(1)
   })
 })

@@ -57,13 +57,26 @@ export async function generateWeeklyPlan(
 
   let plan: WeeklyPlanOutput
   try {
-    plan = validatePlanOutput(rawContent.text)
+    plan = validatePlanOutput(rawContent.text, weekStartDate)
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Failed to parse plan' }
   }
 
   const tokensUsed = message.usage.input_tokens + message.usage.output_tokens
   await trackUsage('weekly_plan', tokensUsed)
+
+  const weekEndDate = new Date(weekStartDate)
+  weekEndDate.setDate(weekEndDate.getDate() + 6)
+  const weekEndStr = weekEndDate.toISOString().split('T')[0]
+
+  await supabase
+    .from('tasks')
+    .delete()
+    .eq('business_id', businessId)
+    .eq('user_id', user.id)
+    .gte('scheduled_date', weekStartDate)
+    .lte('scheduled_date', weekEndStr)
+    .is('completed_at', null)
 
   const { data: planRecord } = await supabase
     .from('generated_plans')
