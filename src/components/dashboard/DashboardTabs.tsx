@@ -15,7 +15,6 @@ interface TaskWithRelations extends Task {
 interface BusinessWithData {
   business: Business
   channels: Channel[]
-  todayTasks: TaskWithRelations[]
   weekTasks: TaskWithRelations[]
   completedThisWeek: number
   totalThisWeek: number
@@ -140,7 +139,9 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
 
       {activeTab === 'today' && (
         <div className="flex flex-col gap-6">
-          {businessesWithData.map(({ business, todayTasks }) => (
+          {businessesWithData.map(({ business, weekTasks: bizWeekTasks }) => {
+            const todayTasks = bizWeekTasks.filter((t) => !t.replaced_at && isToday(t.scheduled_date))
+            return (
             <div key={business.id}>
               <h3
                 className="text-sm font-semibold mb-3"
@@ -267,7 +268,8 @@ export function DashboardTabs({ businessesWithData, weekDates, activeTab, onTabC
                 </div>
               )}
             </div>
-          ))}
+            )
+          })}
           {businessesWithData.length === 0 && (
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
               No active businesses.{' '}

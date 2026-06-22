@@ -1,8 +1,15 @@
+'use client'
+
 import type { ReactNode } from 'react'
+import { isToday } from '@/lib/utils/date'
+
+interface WeekTask {
+  scheduled_date: string
+  completed_at: string | null
+}
 
 interface DashboardStatsProps {
-  totalToday: number
-  completedToday: number
+  weekTasks: WeekTask[]
   totalWeek: number
   completedWeek: number
   activeBusinesses: number
@@ -31,12 +38,15 @@ function StatCard({ color, value, label }: { color: string; value: string; label
 }
 
 export function DashboardStats({
-  totalToday,
-  completedToday,
+  weekTasks,
   totalWeek,
   completedWeek,
   activeBusinesses,
 }: DashboardStatsProps): ReactNode {
+  const todayTasks = weekTasks.filter((t) => isToday(t.scheduled_date))
+  const totalToday = todayTasks.length
+  const completedToday = todayTasks.filter((t) => !!t.completed_at).length
+
   const weekPct = totalWeek > 0 ? `${Math.round((completedWeek / totalWeek) * 100)}%` : '—'
   const todayStr = totalToday > 0 ? `${completedToday} / ${totalToday}` : '0'
 

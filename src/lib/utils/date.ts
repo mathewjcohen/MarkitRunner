@@ -51,6 +51,5 @@ export function formatDateRange(startDateStr: string): string {
 }
 
 export function isToday(dateStr: string): boolean {
-  const today = new Date().toISOString().split('T')[0]
-  return dateStr === today
+  return dateStr === fmt(new Date())
 }

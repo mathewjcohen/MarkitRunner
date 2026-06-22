@@ -13,7 +13,6 @@ interface TaskWithRelations extends Task {
 export interface BusinessWithData {
   business: Business
   channels: Channel[]
-  todayTasks: TaskWithRelations[]
   weekTasks: TaskWithRelations[]
   completedThisWeek: number
   totalThisWeek: number
