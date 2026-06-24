@@ -205,6 +205,21 @@ export async function replaceTask(taskId: string) {
   return { success: true }
 }
 
+export async function getTaskHistory(beforeDate: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data } = await supabase
+    .from('tasks')
+    .select('*, businesses(name), channels(type, label)')
+    .eq('user_id', user.id)
+    .lt('scheduled_date', beforeDate)
+    .order('scheduled_date', { ascending: false })
+
+  return data ?? []
+}
+
 export async function dismissTask(taskId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

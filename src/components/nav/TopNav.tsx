@@ -12,6 +12,7 @@ interface TopNavProps {
 const NAV_LINKS = [
   { href: '/app/dashboard', label: 'Dashboard' },
   { href: '/app/metrics', label: 'Metrics' },
+  { href: '/app/history', label: 'History' },
 ]
 
 export function TopNav({ usage }: TopNavProps) {
